@@ -8,10 +8,9 @@
  */
 
 package keyprotect
-// KeyMetadataAlgorithmMetadata The metadata for the key algorithm.
-type KeyMetadataAlgorithmMetadata struct {
-	// The algorithm bit size used for key encryption.
-	BitLength string `json:"bitLength,omitempty"`
-	// The encryption scheme used to generate the key. Currently, `CBC_PAD` is supported.
-	Mode string `json:"mode,omitempty"`
+// CreateKey The base schema for creating keys.
+type CreateKey struct {
+	Metadata CollectionMetadata `json:"metadata"`
+	// An array of resources.
+	Resources []Key `json:"resources"`
 }

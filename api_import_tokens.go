@@ -14,8 +14,6 @@ import (
 	_ioutil "io/ioutil"
 	_nethttp "net/http"
 	_neturl "net/url"
-	"fmt"
-	"strings"
 	"github.com/antihax/optional"
 )
 
@@ -24,37 +22,35 @@ var (
 	_ _context.Context
 )
 
-// PoliciesApiService PoliciesApi service
-type PoliciesApiService service
+// ImportTokensApiService ImportTokensApi service
+type ImportTokensApiService service
 
-// GetPolicyOpts Optional parameters for the method 'GetPolicy'
-type GetPolicyOpts struct {
+// GetImportTokenOpts Optional parameters for the method 'GetImportToken'
+type GetImportTokenOpts struct {
     CorrelationId optional.String
 }
 
 /*
-GetPolicy Retrieve a list of policies
-Retrieves a list of policies that are associated with a specified key.
+GetImportToken Retrieve an import token
+Retrieves the import token that is associated with your service instance.    When you call &#x60;GET /import_token&#x60;, Key Protect returns the public key that you can use to encrypt and import key material to the service, along with details about the key.     **Note:** After you reach the &#x60;maxAllowedRetrievals&#x60; or &#x60;expirationDate&#x60; for the import token, the import token and its associated public key can no longer be used for key operations. To create a new import token, use  &#x60;POST /import_token&#x60;.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param id The v4 UUID that uniquely identifies the key.
  * @param bluemixInstance The IBM Cloud instance ID that identifies your Key Protect service instance.
- * @param optional nil or *GetPolicyOpts - Optional Parameters:
+ * @param optional nil or *GetImportTokenOpts - Optional Parameters:
  * @param "CorrelationId" (optional.String) -  The v4 UUID used to correlate and track transactions.
-@return CreatePolicy
+@return GetImportToken
 */
-func (a *PoliciesApiService) GetPolicy(ctx _context.Context, id string, bluemixInstance string, localVarOptionals *GetPolicyOpts) (CreatePolicy, *_nethttp.Response, error) {
+func (a *ImportTokensApiService) GetImportToken(ctx _context.Context, bluemixInstance string, localVarOptionals *GetImportTokenOpts) (GetImportToken, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodGet
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  CreatePolicy
+		localVarReturnValue  GetImportToken
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v2/keys/{id}/policies"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath := a.client.cfg.BasePath + "/api/v2/import_token"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
@@ -70,7 +66,7 @@ func (a *PoliciesApiService) GetPolicy(ctx _context.Context, id string, bluemixI
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/vnd.ibm.kms.import_token+json", "application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -103,17 +99,7 @@ func (a *PoliciesApiService) GetPolicy(ctx _context.Context, id string, bluemixI
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v CreatePolicy
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorCollection
+			var v GetImportToken
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -143,6 +129,16 @@ func (a *PoliciesApiService) GetPolicy(ctx _context.Context, id string, bluemixI
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v ErrorCollection
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v ErrorCollection
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -186,42 +182,40 @@ func (a *PoliciesApiService) GetPolicy(ctx _context.Context, id string, bluemixI
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-// PutPolicyOpts Optional parameters for the method 'PutPolicy'
-type PutPolicyOpts struct {
+// PostImportTokenOpts Optional parameters for the method 'PostImportToken'
+type PostImportTokenOpts struct {
     CorrelationId optional.String
 }
 
 /*
-PutPolicy Replace an existing policy
-Replaces the policy that is associated with a specified key
+PostImportToken Create an import token
+Creates an import token that you can use to encrypt and import root keys into the service.  [Learn more](/docs/services/key-protect?topic&#x3D;key-protect-importing-keys#using-import-tokens)     When you call &#x60;POST /import_token&#x60;, Key Protect creates an RSA key-pair from its HSMs. The service encrypts and  stores the private key in the HSM, and returns the corresponding public key when you call &#x60;GET /import_token&#x60;.  You can create only one import token per service instance. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- * @param id The v4 UUID that uniquely identifies the key.
  * @param bluemixInstance The IBM Cloud instance ID that identifies your Key Protect service instance.
- * @param createPolicy The base request for creating a new policies resource.
- * @param optional nil or *PutPolicyOpts - Optional Parameters:
+ * @param importToken The base request to create an import token.
+ * @param optional nil or *PostImportTokenOpts - Optional Parameters:
  * @param "CorrelationId" (optional.String) -  The v4 UUID used to correlate and track transactions.
-@return CreatePolicy
+@return ImportToken
 */
-func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixInstance string, createPolicy CreatePolicy, localVarOptionals *PutPolicyOpts) (CreatePolicy, *_nethttp.Response, error) {
+func (a *ImportTokensApiService) PostImportToken(ctx _context.Context, bluemixInstance string, importToken ImportToken, localVarOptionals *PostImportTokenOpts) (ImportToken, *_nethttp.Response, error) {
 	var (
-		localVarHTTPMethod   = _nethttp.MethodPut
+		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  CreatePolicy
+		localVarReturnValue  ImportToken
 	)
 
 	// create path and map variables
-	localVarPath := a.client.cfg.BasePath + "/api/v2/keys/{id}/policies"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", _neturl.QueryEscape(fmt.Sprintf("%v", id)), -1)
+	localVarPath := a.client.cfg.BasePath + "/api/v2/import_token"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := _neturl.Values{}
 	localVarFormParams := _neturl.Values{}
 
 	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/vnd.ibm.kms.key+json"}
+	localVarHTTPContentTypes := []string{"application/json"}
 
 	// set Content-Type header
 	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
@@ -230,7 +224,7 @@ func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixI
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"application/vnd.ibm.kms.import_token+json", "application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -242,7 +236,7 @@ func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixI
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
 	}
 	// body params
-	localVarPostBody = &createPolicy
+	localVarPostBody = &importToken
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -265,17 +259,7 @@ func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixI
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v CreatePolicy
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v ErrorCollection
+			var v ImportToken
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -295,16 +279,6 @@ func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixI
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
-			var v ErrorCollection
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-			newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 410 {
 			var v ErrorCollection
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

@@ -1,6 +1,7 @@
 # PolicyRotation
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **IntervalMonth** | **int32** | Specifies the key rotation time interval in months | [optional] 
