@@ -1,6 +1,6 @@
 # \KeysApi
 
-All URIs are relative to *https://us-south.kms.cloud.ibm.com*
+All URIs are relative to *https://%7Bregion%7D.kms.cloud.ibm.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 ## ActionOnKey
 
-> OneOfWrapKeyUnwrapKey ActionOnKey(ctx, id, action, bluemixInstance, uNKNOWNBASETYPE, optional)
+> map[string]interface{} ActionOnKey(ctx, id, action, bluemixInstance, body, optional)
 
 Invoke an action on a key
 
@@ -30,7 +30,7 @@ Name | Type | Description  | Notes
 **id** | **string**| The root key that is used as the wrapping key. It must be a v4 UUID for an active key. | 
 **action** | **string**| The action to perform on the specified key. | 
 **bluemixInstance** | **string**| The IBM Cloud instance ID that identifies your Key Protect service instance. | 
-**uNKNOWNBASETYPE** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)| The base request for key actions. | 
+**body** | **map[string]interface{}**| The base request for key actions. | 
  **optional** | ***ActionOnKeyOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -49,7 +49,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**OneOfWrapKeyUnwrapKey**](oneOf&lt;WrapKey,UnwrapKey&gt;.md)
+[**map[string]interface{}**](map[string]interface{}.md)
 
 ### Authorization
 
@@ -67,7 +67,7 @@ Name | Type | Description  | Notes
 
 ## CreateKey
 
-> OneOfCreateKeyImportKeyImportKeyWithImportToken CreateKey(ctx, bluemixInstance, uNKNOWNBASETYPE, optional)
+> map[string]interface{} CreateKey(ctx, bluemixInstance, body, optional)
 
 Create a new key
 
@@ -80,7 +80,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **bluemixInstance** | **string**| The IBM Cloud instance ID that identifies your Key Protect service instance. | 
-**uNKNOWNBASETYPE** | [**UNKNOWN_BASE_TYPE**](UNKNOWN_BASE_TYPE.md)| The base request for creating a new key. | 
+**body** | **map[string]interface{}**| The base request for creating a new key. | 
  **optional** | ***CreateKeyOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -97,7 +97,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**OneOfCreateKeyImportKeyImportKeyWithImportToken**](oneOf&lt;CreateKey,ImportKey,ImportKeyWithImportToken&gt;.md)
+[**map[string]interface{}**](map[string]interface{}.md)
 
 ### Authorization
 
@@ -246,7 +246,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: */*, application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

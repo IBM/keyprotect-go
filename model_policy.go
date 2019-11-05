@@ -13,17 +13,17 @@ import (
 )
 // Policy Properties that are associated with policies.
 type Policy struct {
-	// Specifies the MIME type that represents the policy resource. Currently, only the default is supported.
-	Type string `json:"type"`
-	// The Cloud Resource Name (CRN) that uniquely identifies your cloud network resources.
-	Crn string `json:"crn,omitempty"`
-	// The date the policy was created. The date format follows RFC 3339.
-	CreationDate time.Time `json:"creationDate,omitempty"`
 	// The unique identifier for the resource that created the policy.
 	CreatedBy string `json:"createdBy,omitempty"`
+	// The date the policy was created. The date format follows RFC 3339.
+	CreationDate time.Time `json:"creationDate,omitempty"`
+	// The Cloud Resource Name (CRN) that uniquely identifies your cloud network resources.
+	Crn string `json:"crn,omitempty"`
 	// Updates when the policy is replaced or modified. The date format follows RFC 3339.
 	LastUpdateDate time.Time `json:"lastUpdateDate,omitempty"`
+	Rotation PolicyRotation `json:"rotation"`
+	// Specifies the MIME type that represents the policy resource. Currently, only the default is supported.
+	Type string `json:"type"`
 	// The unique identifier for the resource that updated the policy.
 	UpdatedBy string `json:"updatedBy,omitempty"`
-	Rotation PolicyRotation `json:"rotation"`
 }

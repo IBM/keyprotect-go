@@ -1,6 +1,6 @@
 # \ImportTokensApi
 
-All URIs are relative to *https://us-south.kms.cloud.ibm.com*
+All URIs are relative to *https://%7Bregion%7D.kms.cloud.ibm.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -56,7 +56,7 @@ Name | Type | Description  | Notes
 
 ## PostImportToken
 
-> ImportToken PostImportToken(ctx, bluemixInstance, importToken, optional)
+> ImportToken PostImportToken(ctx, bluemixInstance, body, optional)
 
 Create an import token
 
@@ -69,7 +69,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **bluemixInstance** | **string**| The IBM Cloud instance ID that identifies your Key Protect service instance. | 
-**importToken** | [**ImportToken**](ImportToken.md)| The base request to create an import token. | 
+**body** | [**ImportToken**](ImportToken.md)| The base request to create an import token. | 
  **optional** | ***PostImportTokenOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters
@@ -94,7 +94,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: application/json
-- **Accept**: application/vnd.ibm.kms.import_token+json, application/json
+- **Accept**: application/vnd.ibm.kms.import_token+json, application/json, 
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

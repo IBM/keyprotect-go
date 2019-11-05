@@ -10,8 +10,8 @@
 package keyprotect
 // CollectionMetadata The metadata that describes the resource array.
 type CollectionMetadata struct {
-	// The type of resources in the resource array.
-	CollectionType string `json:"collectionType"`
 	// The number of elements in the resource array.
 	CollectionTotal int64 `json:"collectionTotal"`
+	// The type of resources in the resource array.
+	CollectionType string `json:"collectionType"`
 }

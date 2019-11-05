@@ -77,6 +77,18 @@ func (a *ImportTokensApiService) GetImportToken(ctx _context.Context, bluemixIns
 	if localVarOptionals != nil && localVarOptionals.CorrelationId.IsSet() {
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
 	}
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -192,12 +204,12 @@ PostImportToken Create an import token
 Creates an import token that you can use to encrypt and import root keys into the service.  [Learn more](/docs/services/key-protect?topic&#x3D;key-protect-importing-keys#using-import-tokens)     When you call &#x60;POST /import_token&#x60;, Key Protect creates an RSA key-pair from its HSMs. The service encrypts and  stores the private key in the HSM, and returns the corresponding public key when you call &#x60;GET /import_token&#x60;.  You can create only one import token per service instance. 
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param bluemixInstance The IBM Cloud instance ID that identifies your Key Protect service instance.
- * @param importToken The base request to create an import token.
+ * @param body The base request to create an import token.
  * @param optional nil or *PostImportTokenOpts - Optional Parameters:
  * @param "CorrelationId" (optional.String) -  The v4 UUID used to correlate and track transactions.
 @return ImportToken
 */
-func (a *ImportTokensApiService) PostImportToken(ctx _context.Context, bluemixInstance string, importToken ImportToken, localVarOptionals *PostImportTokenOpts) (ImportToken, *_nethttp.Response, error) {
+func (a *ImportTokensApiService) PostImportToken(ctx _context.Context, bluemixInstance string, body ImportToken, localVarOptionals *PostImportTokenOpts) (ImportToken, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
@@ -236,7 +248,19 @@ func (a *ImportTokensApiService) PostImportToken(ctx _context.Context, bluemixIn
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
 	}
 	// body params
-	localVarPostBody = &importToken
+	localVarPostBody = &body
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err

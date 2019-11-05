@@ -1,6 +1,6 @@
 # \PoliciesApi
 
-All URIs are relative to *https://us-south.kms.cloud.ibm.com*
+All URIs are relative to *https://%7Bregion%7D.kms.cloud.ibm.com*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -58,7 +58,7 @@ Name | Type | Description  | Notes
 
 ## PutPolicy
 
-> CreatePolicy PutPolicy(ctx, id, bluemixInstance, createPolicy, optional)
+> CreatePolicy PutPolicy(ctx, id, bluemixInstance, body, optional)
 
 Replace an existing policy
 
@@ -72,7 +72,7 @@ Name | Type | Description  | Notes
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **id** | **string**| The v4 UUID that uniquely identifies the key. | 
 **bluemixInstance** | **string**| The IBM Cloud instance ID that identifies your Key Protect service instance. | 
-**createPolicy** | [**CreatePolicy**](CreatePolicy.md)| The base request for creating a new policies resource. | 
+**body** | [**CreatePolicy**](CreatePolicy.md)| The base request for creating a new policies resource. | 
  **optional** | ***PutPolicyOpts** | optional parameters | nil if no parameters
 
 ### Optional Parameters

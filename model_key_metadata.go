@@ -13,17 +13,17 @@ import (
 )
 // KeyMetadata Additional properties that describe a key.
 type KeyMetadata struct {
-	// The date the key material was created. The date format follows RFC 3339.
-	CreationDate time.Time `json:"creationDate,omitempty"`
-	// The unique identifier for the resource that created the key.
-	CreatedBy string `json:"createdBy,omitempty"`
+	AlgorithmMetadata KeyMetadataAlgorithmMetadata `json:"algorithmMetadata,omitempty"`
 	// The algorithm type used to generate the key. Currently, AES is supported.
 	AlgorithmType string `json:"algorithmType,omitempty"`
-	AlgorithmMetadata KeyMetadataAlgorithmMetadata `json:"algorithmMetadata,omitempty"`
-	// A code indicating the reason the key is not in the activation state.
-	NonactiveStateReason int32 `json:"nonactiveStateReason,omitempty"`
-	// Updates when any part of the key metadata is modified. The date format follows RFC 3339.
-	LastUpdateDate time.Time `json:"lastUpdateDate,omitempty"`
+	// The unique identifier for the resource that created the key.
+	CreatedBy string `json:"createdBy,omitempty"`
+	// The date the key material was created. The date format follows RFC 3339.
+	CreationDate time.Time `json:"creationDate,omitempty"`
 	// Updates to show when the key was last rotated. The date format follows RFC 3339.
 	LastRotateDate time.Time `json:"lastRotateDate,omitempty"`
+	// Updates when any part of the key metadata is modified. The date format follows RFC 3339.
+	LastUpdateDate time.Time `json:"lastUpdateDate,omitempty"`
+	// A code indicating the reason the key is not in the activation state.
+	NonactiveStateReason int32 `json:"nonactiveStateReason,omitempty"`
 }

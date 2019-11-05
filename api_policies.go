@@ -81,6 +81,18 @@ func (a *PoliciesApiService) GetPolicy(ctx _context.Context, id string, bluemixI
 	if localVarOptionals != nil && localVarOptionals.CorrelationId.IsSet() {
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
 	}
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -197,12 +209,12 @@ Replaces the policy that is associated with a specified key
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param id The v4 UUID that uniquely identifies the key.
  * @param bluemixInstance The IBM Cloud instance ID that identifies your Key Protect service instance.
- * @param createPolicy The base request for creating a new policies resource.
+ * @param body The base request for creating a new policies resource.
  * @param optional nil or *PutPolicyOpts - Optional Parameters:
  * @param "CorrelationId" (optional.String) -  The v4 UUID used to correlate and track transactions.
 @return CreatePolicy
 */
-func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixInstance string, createPolicy CreatePolicy, localVarOptionals *PutPolicyOpts) (CreatePolicy, *_nethttp.Response, error) {
+func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixInstance string, body CreatePolicy, localVarOptionals *PutPolicyOpts) (CreatePolicy, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPut
 		localVarPostBody     interface{}
@@ -242,7 +254,19 @@ func (a *PoliciesApiService) PutPolicy(ctx _context.Context, id string, bluemixI
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
 	}
 	// body params
-	localVarPostBody = &createPolicy
+	localVarPostBody = &body
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err

@@ -13,8 +13,8 @@ import (
 )
 // GetImportTokenAllOf struct for GetImportTokenAllOf
 type GetImportTokenAllOf struct {
-	// The public encryption key that you can use to encrypt key material before you import it into the service.     This value is a PEM-encoded public key in PKIX format. Because PEM encoding is a binary format, the value is base64 encoded.
-	Payload *os.File `json:"payload,omitempty"`
 	// The nonce value that is used to verify a key import request. Encrypt and provide the encrypted nonce value when you use `POST /keys` to securely import a key to the service.
 	Nonce *os.File `json:"nonce,omitempty"`
+	// The public encryption key that you can use to encrypt key material before you import it into the service.     This value is a PEM-encoded public key in PKIX format. Because PEM encoding is a binary format, the value is base64 encoded.
+	Payload *os.File `json:"payload,omitempty"`
 }
