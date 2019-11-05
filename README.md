@@ -29,7 +29,7 @@ import "./keyprotect"
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://us-south.kms.cloud.ibm.com*
+All URIs are relative to *https://%7Bregion%7D.kms.cloud.ibm.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -77,14 +77,14 @@ Class | Method | HTTP request | Description
 
 ## BearerAuth
 
-- **Type**: HTTP basic authentication
+- **Type**: API key
 
 Example
 
 ```golang
-auth := context.WithValue(context.Background(), sw.ContextBasicAuth, sw.BasicAuth{
-    UserName: "username",
-    Password: "password",
+auth := context.WithValue(context.Background(), sw.ContextAPIKey, sw.APIKey{
+    Key: "APIKEY",
+    Prefix: "Bearer", // Omit if not necessary.
 })
 r, err := client.Service.Operation(auth, args)
 ```
@@ -92,4 +92,5 @@ r, err := client.Service.Operation(auth, args)
 
 ## Author
 
-IBM
+
+

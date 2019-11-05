@@ -40,20 +40,20 @@ Invokes an action, such as a &#x60;wrap&#x60;, &#x60;unwrap&#x60;, or &#x60;rota
  * @param id The root key that is used as the wrapping key. It must be a v4 UUID for an active key.
  * @param action The action to perform on the specified key.
  * @param bluemixInstance The IBM Cloud instance ID that identifies your Key Protect service instance.
- * @param uNKNOWNBASETYPE The base request for key actions.
+ * @param body The base request for key actions.
  * @param optional nil or *ActionOnKeyOpts - Optional Parameters:
  * @param "CorrelationId" (optional.String) -  The v4 UUID used to correlate and track transactions.
  * @param "Prefer" (optional.String) -  Alters server behavior for POST or DELETE operations. A header with `return=minimal` causes the service to  return only the key identifier, or metadata. A header containing `return=representation` returns both the key  material and metadata in the response entity-body. If the key has been designated as a root key, the  system cannot return the key material.      **Note:** During POST operations, Key Protect may not immediately return the key material due to key generation time. To retrieve the key material, you can perform a subsequent `GET /keys/{id}` request.
-@return OneOfWrapKeyUnwrapKey
+@return map[string]interface{}
 */
-func (a *KeysApiService) ActionOnKey(ctx _context.Context, id string, action string, bluemixInstance string, uNKNOWNBASETYPE UNKNOWN_BASE_TYPE, localVarOptionals *ActionOnKeyOpts) (OneOfWrapKeyUnwrapKey, *_nethttp.Response, error) {
+func (a *KeysApiService) ActionOnKey(ctx _context.Context, id string, action string, bluemixInstance string, body map[string]interface{}, localVarOptionals *ActionOnKeyOpts) (map[string]interface{}, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  OneOfWrapKeyUnwrapKey
+		localVarReturnValue  map[string]interface{}
 	)
 
 	// create path and map variables
@@ -90,7 +90,19 @@ func (a *KeysApiService) ActionOnKey(ctx _context.Context, id string, action str
 		localVarHeaderParams["Prefer"] = parameterToString(localVarOptionals.Prefer.Value(), "")
 	}
 	// body params
-	localVarPostBody = &uNKNOWNBASETYPE
+	localVarPostBody = &body
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -113,7 +125,7 @@ func (a *KeysApiService) ActionOnKey(ctx _context.Context, id string, action str
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 200 {
-			var v OneOfWrapKeyUnwrapKey
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -237,20 +249,20 @@ CreateKey Create a new key
 Creates a new key with specified key material.      Key Protect designates the resource as either a root key or a standard key based on the &#x60;extractable&#x60; value that you specify. A successful &#x60;POST /keys&#x60; operation adds the key to the service and  returns the details of the request in the response entity-body, if the Prefer header is set to  &#x60;return&#x3D;representation&#x60;.
  * @param ctx _context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  * @param bluemixInstance The IBM Cloud instance ID that identifies your Key Protect service instance.
- * @param uNKNOWNBASETYPE The base request for creating a new key.
+ * @param body The base request for creating a new key.
  * @param optional nil or *CreateKeyOpts - Optional Parameters:
  * @param "CorrelationId" (optional.String) -  The v4 UUID used to correlate and track transactions.
  * @param "Prefer" (optional.String) -  Alters server behavior for POST or DELETE operations. A header with `return=minimal` causes the service to  return only the key identifier, or metadata. A header containing `return=representation` returns both the key  material and metadata in the response entity-body. If the key has been designated as a root key, the  system cannot return the key material.      **Note:** During POST operations, Key Protect may not immediately return the key material due to key generation time. To retrieve the key material, you can perform a subsequent `GET /keys/{id}` request.
-@return OneOfCreateKeyImportKeyImportKeyWithImportToken
+@return map[string]interface{}
 */
-func (a *KeysApiService) CreateKey(ctx _context.Context, bluemixInstance string, uNKNOWNBASETYPE UNKNOWN_BASE_TYPE, localVarOptionals *CreateKeyOpts) (OneOfCreateKeyImportKeyImportKeyWithImportToken, *_nethttp.Response, error) {
+func (a *KeysApiService) CreateKey(ctx _context.Context, bluemixInstance string, body map[string]interface{}, localVarOptionals *CreateKeyOpts) (map[string]interface{}, *_nethttp.Response, error) {
 	var (
 		localVarHTTPMethod   = _nethttp.MethodPost
 		localVarPostBody     interface{}
 		localVarFormFileName string
 		localVarFileName     string
 		localVarFileBytes    []byte
-		localVarReturnValue  OneOfCreateKeyImportKeyImportKeyWithImportToken
+		localVarReturnValue  map[string]interface{}
 	)
 
 	// create path and map variables
@@ -285,7 +297,19 @@ func (a *KeysApiService) CreateKey(ctx _context.Context, bluemixInstance string,
 		localVarHeaderParams["Prefer"] = parameterToString(localVarOptionals.Prefer.Value(), "")
 	}
 	// body params
-	localVarPostBody = &uNKNOWNBASETYPE
+	localVarPostBody = &body
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -308,7 +332,7 @@ func (a *KeysApiService) CreateKey(ctx _context.Context, bluemixInstance string,
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 201 {
-			var v OneOfCreateKeyImportKeyImportKeyWithImportToken
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -449,6 +473,18 @@ func (a *KeysApiService) DeleteKey(ctx _context.Context, id string, bluemixInsta
 	}
 	if localVarOptionals != nil && localVarOptionals.Prefer.IsSet() {
 		localVarHeaderParams["Prefer"] = parameterToString(localVarOptionals.Prefer.Value(), "")
+	}
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -619,6 +655,18 @@ func (a *KeysApiService) GetKey(ctx _context.Context, id string, bluemixInstance
 	if localVarOptionals != nil && localVarOptionals.CorrelationId.IsSet() {
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
 	}
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
+	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -763,7 +811,7 @@ func (a *KeysApiService) GetKeyCollectionMetadata(ctx _context.Context, bluemixI
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"*/*", "application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -773,6 +821,18 @@ func (a *KeysApiService) GetKeyCollectionMetadata(ctx _context.Context, bluemixI
 	localVarHeaderParams["Bluemix-Instance"] = parameterToString(bluemixInstance, "")
 	if localVarOptionals != nil && localVarOptionals.CorrelationId.IsSet() {
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
+	}
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {
@@ -901,6 +961,18 @@ func (a *KeysApiService) GetKeys(ctx _context.Context, bluemixInstance string, l
 	localVarHeaderParams["Bluemix-Instance"] = parameterToString(bluemixInstance, "")
 	if localVarOptionals != nil && localVarOptionals.CorrelationId.IsSet() {
 		localVarHeaderParams["Correlation-Id"] = parameterToString(localVarOptionals.CorrelationId.Value(), "")
+	}
+	if ctx != nil {
+		// API Key Authentication
+		if auth, ok := ctx.Value(ContextAPIKey).(APIKey); ok {
+			var key string
+			if auth.Prefix != "" {
+				key = auth.Prefix + " " + auth.Key
+			} else {
+				key = auth.Key
+			}
+			localVarHeaderParams["Authorization"] = key
+		}
 	}
 	r, err := a.client.prepareRequest(ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, localVarFormFileName, localVarFileName, localVarFileBytes)
 	if err != nil {

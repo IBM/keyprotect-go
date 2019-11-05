@@ -62,7 +62,7 @@ type Configuration struct {
 // NewConfiguration returns a new Configuration object
 func NewConfiguration() *Configuration {
 	cfg := &Configuration{
-		BasePath:      "https://us-south.kms.cloud.ibm.com",
+		BasePath:      "https://%7Bregion%7D.kms.cloud.ibm.com",
 		DefaultHeader: make(map[string]string),
 		UserAgent:     "OpenAPI-Generator/1.0.0/go",
 	}

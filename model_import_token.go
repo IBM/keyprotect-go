@@ -13,14 +13,14 @@ import (
 )
 // ImportToken Properties that are associated with import tokens.
 type ImportToken struct {
-	// The time in seconds from the creation of an import token that determines how long its associated public key  remains valid.     The minimum value is `300` seconds (5 minutes), and the maximum value is `86400` (24 hours). The default value is `600` (10 minutes).
-	Expiration float32 `json:"expiration,omitempty"`
-	// The number of times that an import token can be retrieved within its expiration time before it is no longer accessible. 
-	MaxAllowedRetrievals float32 `json:"maxAllowedRetrievals,omitempty"`
 	// The date the import token was created. The date format follows RFC 3339.
 	CreationDate time.Time `json:"creationDate,omitempty"`
+	// The time in seconds from the creation of an import token that determines how long its associated public key  remains valid.     The minimum value is `300` seconds (5 minutes), and the maximum value is `86400` (24 hours). The default value is `600` (10 minutes).
+	Expiration float32 `json:"expiration,omitempty"`
 	// The date the import token expires. The date format follows RFC 3339.
 	ExpirationDate time.Time `json:"expirationDate,omitempty"`
+	// The number of times that an import token can be retrieved within its expiration time before it is no longer accessible. 
+	MaxAllowedRetrievals float32 `json:"maxAllowedRetrievals,omitempty"`
 	// The number of retrievals that are available for the import token before it is no longer accessible.  
 	RemainingRetrievals float32 `json:"remainingRetrievals,omitempty"`
 }

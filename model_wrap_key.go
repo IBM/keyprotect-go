@@ -10,10 +10,10 @@
 package keyprotect
 // WrapKey Properties that are associated with wrap actions.
 type WrapKey struct {
-	// The data encryption key (DEK) used in wrap actions when the query parameter is set to `wrap`. The system returns a base64 encoded plaintext in the response entity-body when you perform an `unwrap` action on a key.     To wrap an existing DEK, provide a base64 encoded plaintext during a `wrap` action. To generate a new DEK, omit the `plaintext` property. Key Protect generates a random plaintext (32 bytes) that is rooted in an HSM and then wraps that value. 
-	Plaintext string `json:"plaintext"`
 	// The additional authentication data (AAD) used to further secure the key.     If you supply AAD when you make a `wrap` call, you must specify the same AAD during a subsequent `unwrap` call. 
 	Aad []string `json:"aad,omitempty"`
 	// The wrapped data encryption key (DEK) that you can export to your app or service. The value is base64 encoded.
 	Ciphertext string `json:"ciphertext,omitempty"`
+	// The data encryption key (DEK) used in wrap actions when the query parameter is set to `wrap`. The system returns a base64 encoded plaintext in the response entity-body when you perform an `unwrap` action on a key.     To wrap an existing DEK, provide a base64 encoded plaintext during a `wrap` action. To generate a new DEK, omit the `plaintext` property. Key Protect generates a random plaintext (32 bytes) that is rooted in an HSM and then wraps that value. 
+	Plaintext string `json:"plaintext"`
 }

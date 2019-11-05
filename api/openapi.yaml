@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.1
 info:
   contact:
     name: IBM Key Protect
@@ -16,25 +16,407 @@ info:
   version: 2.0.0
   x-ibm-name: key-protect
   x-try-it-out-enabled:
-    enabled: false
+    corsPolicy: true
     credentials: false
     defaultApiEndpoint: https://us-south.kms.cloud.ibm.com
-    corsPolicy: true
+    enabled: false
 servers:
-- url: https://{region}.kms.cloud.ibm.com
-  variables:
-    region:
-      default: us-south
-      description: The region prefix that represents the geographic area where your
-        Key Protect service instance resides.
-      enum:
-      - au-syd
-      - eu-de
-      - eu-gb
-      - jp-tok
-      - us-east
-      - us-south
+- url: https://%7Bregion%7D.kms.cloud.ibm.com
 paths:
+  /api/v2/import_token:
+    get:
+      description: "Retrieves the import token that is associated with your service\
+        \ instance.\n  \nWhen you call `GET /import_token`, Key Protect returns the\
+        \ public key that you can use to encrypt and import key material to the service,\
+        \ along with details about the key. \n  \n**Note:** After you reach the `maxAllowedRetrievals`\
+        \ or `expirationDate` for the import token, the import token and its associated\
+        \ public key can no longer be used for key operations. To create a new import\
+        \ token, use  `POST /import_token`."
+      operationId: getImportToken
+      parameters:
+      - description: The IBM Cloud instance ID that identifies your Key Protect service
+          instance.
+        in: header
+        name: Bluemix-Instance
+        required: true
+        schema:
+          type: string
+      - description: The v4 UUID used to correlate and track transactions.
+        in: header
+        name: Correlation-Id
+        schema:
+          type: string
+      responses:
+        200:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              example:
+                creationDate: YYYY-MM-DDTHH:MM:SSZ
+                expirationDate: YYYY-MM-DDTHH:MM:SSZ
+                maxAllowedRetrievals: 10
+                nonce: '...'
+                payload: '...'
+                remainingRetrievals: 9
+              schema:
+                $ref: '#/components/schemas/GetImportToken'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetImportToken'
+          description: The import token was successfully retrieved.
+        401:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
+                  have the necessary permissions to make this request. Verify that
+                  the given IBM Cloud access token and instance ID are correct. If
+                  the error  persists, contact the account owner to check your permissions.'''
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+          description: Your credentials are invalid or do not have the necessary permissions
+            to make this request. Verify that the  given IBM Cloud access token and
+            instance ID are correct. If the error persists, contact the account owner
+            to check your permissions.
+        403:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
+                    to access this resource.'
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+          description: Your IBM Cloud access token is not authorized to access this
+            resource.
+        404:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - 'errorMsg: ''Not found: An import token was not found in the specified
+                  service instance. To  create an import token, use `POST /import_token`'
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+          description: An import token was not found in the specified service instance.
+            To create an import token, use  `POST /import_token`
+        409:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - 'errorMsg: ''Conflict: The import token has reached its `maxAllowedRetrievals`
+                  or `expirationDate`. To  create a new import token, use `POST /import_token`. '
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+          description: "The import token has reached its `maxAllowedRetrievals` or\
+            \ `expirationDate`, and it is no longer available for use. To create a\
+            \ new import token, use `POST /import_token`.\n  \nIn very rare cases,\
+            \ the import token may expire before its expiration time. Ensure that\
+            \ your client application is configured with a retry mechanism for catching\
+            \ and responding to `409` conflict exceptions.  "
+        429:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - errorMsg: 'Too Many Requests: Please wait a few minutes and try
+                    again.'
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+          description: Too many requests. Please wait a few minutes and try again.
+        500:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
+                  unavailable. Your request could not be  processed. Please try again
+                  later.'''
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+          description: "IBM Key Protect is currently unavailable. Your request could\
+            \ not be processed. Please try again later. \n    \nIf the problem persists,\
+            \ note the `correlation-ID` in the response header and contact [IBM Cloud\
+            \ support](https://watson.service-now.com/wcp)."
+      security:
+      - BearerAuth: []
+      summary: Retrieve an import token
+      tags:
+      - Import tokens
+      x-sdk-operations:
+        request-examples:
+          curl:
+          - example:
+            - lang: curl
+              source:
+              - |-
+                curl GET \
+                  https://<region>.kms.cloud.ibm.com/api/v2/import_token \
+                  -H 'authorization: Bearer <IAM_token>' \
+                  -H 'bluemix-instance: <instance_ID>' \
+                  -H 'content-type: application/vnd.ibm.kms.import_token+json'
+              type: code
+            name: Example request
+          javascript:
+          - example:
+            - lang: javascript
+              source:
+              - |-
+                var settings = {
+                  "async": true,
+                  "crossDomain": true,
+                  "url": "https://<region>.kms.cloud.ibm.com/api/v2/import_token",
+                  "method": "GET",
+                  "headers": {
+                    "authorization": "Bearer <IAM_token>",
+                    "bluemix-instance": "<instance_ID>",
+                    "content-type": "application/vnd.ibm.kms.import_token+json"
+                  }
+                }
+
+                $.ajax(settings).done(function (response) {
+                  console.log(response);
+                });
+              type: code
+            name: Example request
+          python:
+          - example:
+            - lang: python
+              source:
+              - |-
+                import requests
+
+                url = "https://<region>.kms.cloud.ibm.com/api/v2/import_token"
+
+                headers = {
+                  "authorization": "Bearer <IAM_token>",
+                  "bluemix-instance": "<instance_ID>",
+                  "content-type": "application/vnd.ibm.kms.import_token+json"
+                }
+
+                response = requests.request("GET", url, headers=headers)
+
+                print(response.text)
+              type: code
+            name: Example request
+      x-try-it-out-example:
+      - in: header
+        name: Authorization
+        value: ""
+      - in: header
+        name: Bluemix-Instance
+        value: ""
+    post:
+      description: "Creates an import token that you can use to encrypt and import\
+        \ root keys into the service.  [Learn more](/docs/services/key-protect?topic=key-protect-importing-keys#using-import-tokens)\n\
+        \   \nWhen you call `POST /import_token`, Key Protect creates an RSA key-pair\
+        \ from its HSMs. The service encrypts and  stores the private key in the HSM,\
+        \ and returns the corresponding public key when you call `GET /import_token`.\
+        \  You can create only one import token per service instance. "
+      operationId: postImportToken
+      parameters:
+      - description: The IBM Cloud instance ID that identifies your Key Protect service
+          instance.
+        in: header
+        name: Bluemix-Instance
+        required: true
+        schema:
+          type: string
+      - description: The v4 UUID used to correlate and track transactions.
+        in: header
+        name: Correlation-Id
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ImportToken'
+        description: The base request to create an import token.
+        required: true
+      responses:
+        200:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              example:
+                creationDate: YYYY-MM-DDTHH:MM:SSZ
+                expirationDate: YYYY-MM-DDTHH:MM:SSZ
+                maxAllowedRetrievals: 10
+                remainingRetrievals: 10
+              schema:
+                $ref: '#/components/schemas/ImportToken'
+          description: The import token was successfully created.
+        401:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
+                  have the necessary permissions to make this request. Verify that
+                  the given IBM Cloud access token and instance ID are correct. If
+                  the error  persists, contact the account owner to check your permissions.'''
+          description: Your credentials are invalid or do not have the necessary permissions
+            to make this request. Verify that the  given IBM Cloud access token and
+            instance ID are correct. If the error persists, contact the account owner
+            to check your permissions.
+        403:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
+                    to access this resource.'
+          description: Your IBM Cloud access token is not authorized to access this
+            resource.
+        429:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - errorMsg: 'Too Many Requests: Please wait a few minutes and try
+                    again.'
+          description: Too many requests. Please wait a few minutes and try again.
+        500:
+          content:
+            application/vnd.ibm.kms.import_token+json:
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
+            application/json:
+              example:
+                metadata:
+                  collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
+                resources:
+                - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
+                  unavailable. Your request could not be  processed. Please try again
+                  later.'''
+          description: "IBM Key Protect is currently unavailable. Your request could\
+            \ not be processed. Please try again later. \n    \nIf the problem persists,\
+            \ note the `correlation-ID` in the response header and contact [IBM Cloud\
+            \ support](https://watson.service-now.com/wcp)."
+      security:
+      - BearerAuth: []
+      summary: Create an import token
+      tags:
+      - Import tokens
+      x-sdk-operations:
+        request-examples:
+          curl:
+          - example:
+            - lang: curl
+              source:
+              - "curl -X POST \\\n  https://<region>.kms.cloud.ibm.com/api/v2/import_token\
+                \ \\\n  -H 'accept: application/vnd.ibm.collection+json' \\\n  -H\
+                \ 'authorization: Bearer <IAM_token>' \\\n  -H 'bluemix-instance:\
+                \ <instance_ID>' \\\n  -H 'content-type: application/json' \\\n  -d\
+                \ '{ \n    \"expiration\": <expiration_time>, \\\n    \"maxAllowedRetrievals\"\
+                : <use_count> \n  }'"
+              type: code
+            name: Example request
+          javascript:
+          - example:
+            - lang: javascript
+              source:
+              - |-
+                var settings = {
+                  "async": true,
+                  "crossDomain": true,
+                  "url": "https://<region>.kms.cloud.ibm.com/api/v2/import_token",
+                  "method": "POST",
+                  "headers": {
+                    "accept": "application/vnd.ibm.collection+json",
+                    "authorization": "Bearer <IAM_token>",
+                    "bluemix-instance": "<instance_ID>",
+                    "content-type": "application/json"
+                  },
+                  "processData": false,
+                  "data": {
+                    "expiration": <expiration_time>,
+                    "maxAllowedRetrievals": <use_count>
+                  }
+                }
+
+                $.ajax(settings).done(function (response) {
+                  console.log(response);
+                });
+              type: code
+            name: Example request
+          python:
+          - example:
+            - lang: python
+              source:
+              - "import requests\n\nurl = \"https://<region>.kms.cloud.ibm.com/api/v2/import_token\"\
+                \n\npayload = {\n  \"expiration\": <expiration_time>,\n  \"maxAllowedRetrievals\"\
+                : <use_count>\n  }\n  \nheaders = {\n  \"accept\": \"application/vnd.ibm.collection+json\"\
+                ,\n  \"authorization\": \"Bearer <IAM_token>\",\n  \"bluemix-instance\"\
+                : \"<instance_ID>\",\n  \"content-type\": \"application/json\"\n \
+                \ }\n\nresponse = requests.request(\"POST\", url, data=payload, headers=headers)\n\
+                \nprint(response.text)"
+              type: code
+            name: Example request
+      x-try-it-out-example:
+      - in: header
+        name: Authorization
+        value: ""
+      - in: header
+        name: Bluemix-Instance
+        value: ""
+      x-codegen-request-body-name: body
   /api/v2/keys:
     get:
       description: "Retrieves a list of keys that are stored in your Key Protect service\
@@ -45,94 +427,81 @@ paths:
       parameters:
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       - description: "The number of keys to retrieve. By default, `GET /keys` returns\
           \ the first 200 keys. To retrieve a different set of keys, use `limit` with\
           \ `offset` to page through your available resources. The maximum value for\
           \ `limit` is 5000.\n  \n**Usage:** If you have 20 keys in your instance,\
           \ and you want to retrieve only the first 5 keys, use  `../keys?limit=5`."
-        explode: true
         in: query
         name: limit
-        required: false
         schema:
           default: 200
           maximum: 5000
           minimum: 1
           type: integer
-        style: form
       - description: "The number of keys to skip. By specifying `offset`, you retrieve\
           \ a subset of keys that starts with the `offset` value. Use `offset` with\
           \ `limit` to page through your available resources.\n  \n**Usage:** If you\
           \ have 100 keys in your instance, and you want to retrieve keys 26 through\
           \ 50, use  `../keys?offset=25&limit=25`.    "
-        explode: true
         in: query
         name: offset
-        required: false
         schema:
           default: 0
           minimum: 0
           type: integer
-        style: form
       responses:
         200:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.key+json
                   collectionTotal: 2
+                  collectionType: application/vnd.ibm.kms.key+json
                 resources:
-                - type: application/vnd.ibm.kms.key+json
-                  name: Root-key
-                  id: '...'
+                - createdBy: '...'
+                  creationDate: YYYY-MM-DDTHH:MM:SSZ
+                  crn: '...'
                   description: '...'
-                  state: 1
                   extractable: false
-                  createdBy: '...'
-                  creationDate: YYYY-MM-DDTHH:MM:SSZ
-                  crn: '...'
-                - type: application/vnd.ibm.kms.key+json
-                  name: Standard-key
                   id: '...'
-                  description: '...'
+                  name: Root-key
                   state: 1
-                  extractable: true
-                  createdBy: '...'
+                  type: application/vnd.ibm.kms.key+json
+                - createdBy: '...'
                   creationDate: YYYY-MM-DDTHH:MM:SSZ
                   crn: '...'
+                  description: '...'
+                  extractable: true
+                  id: '...'
+                  name: Standard-key
+                  state: 1
+                  type: application/vnd.ibm.kms.key+json
               schema:
                 $ref: '#/components/schemas/ListKeys'
           description: The list of keys was successfully retrieved.
           headers:
             Key-Total:
               description: The number of keys in your service instance.
-              explode: false
               schema:
                 type: integer
-              style: simple
         401:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -149,8 +518,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -163,8 +532,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -176,8 +545,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -196,10 +565,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl GET \
@@ -207,11 +574,11 @@ paths:
                   -H 'authorization: Bearer <IAM_token>' \
                   -H 'bluemix-instance: <instance_ID>' \
                   -H 'accept: application/vnd.ibm.kms.key+json'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -228,11 +595,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - |-
                 import requests
@@ -248,6 +615,8 @@ paths:
                 response = requests.request('GET', url, headers=headers)
 
                 print(response.text)
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: header
         name: Authorization
@@ -263,89 +632,87 @@ paths:
       parameters:
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       responses:
         200:
+          content: {}
           description: The metadata was successfully retrieved.
           headers:
             Key-Total:
               description: The number of keys in your service instance.
-              explode: false
               schema:
                 type: integer
-              style: simple
         401:
           content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
                   the given IBM Cloud access token and instance ID are correct. If
                   the error  persists, contact the account owner to check your permissions.'''
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
           description: Your credentials are invalid or do not have the necessary permissions
             to make this request. Verify that the  given IBM Cloud access token and
             instance ID are correct. If the error persists, contact the account owner
             to check your permissions.
         403:
           content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
           description: Your IBM Cloud access token is not authorized to access this
             resource.
         429:
           content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
           description: Too many requests. Please wait a few minutes and try again.
         500:
           content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/ErrorCollection'
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
                   later.'''
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
           description: "IBM Key Protect is currently unavailable. Your request could\
             \ not be processed. Please try again later. \n    \nIf the problem persists,\
             \ note the `correlation-ID` in the response header and contact [IBM Cloud\
@@ -358,10 +725,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl -I HEAD \
@@ -369,11 +734,11 @@ paths:
                   -H 'authorization: Bearer <IAM_token>' \
                   -H 'bluemix-instance: <instance_ID>' \
                   -H 'accept: application/vnd.ibm.kms.key+json'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -390,11 +755,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - |-
                 import requests
@@ -410,6 +775,8 @@ paths:
                 response = requests.request('HEAD', url, headers=headers)
 
                 print(response.text)
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: header
         name: Authorization
@@ -427,21 +794,16 @@ paths:
       parameters:
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       - description: "Alters server behavior for POST or DELETE operations. A header\
           \ with `return=minimal` causes the service to  return only the key identifier,\
           \ or metadata. A header containing `return=representation` returns both\
@@ -450,46 +812,45 @@ paths:
           \  \n  \n**Note:** During POST operations, Key Protect may not immediately\
           \ return the key material due to key generation time. To retrieve the key\
           \ material, you can perform a subsequent `GET /keys/{id}` request."
-        explode: false
         in: header
         name: Prefer
-        required: false
         schema:
           enum:
           - return=representation
           - return=minimal
           type: string
-        style: simple
       requestBody:
-        $ref: '#/components/requestBodies/CreateKeyBody'
+        content:
+          application/vnd.ibm.kms.key+json:
+            schema:
+              type: object
+        description: The base request for creating a new key.
+        required: true
       responses:
         201:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.key+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.key+json
                 resources:
-                - type: application/vnd.ibm.kms.key+json
-                  name: Root-key
+                - crn: '...'
                   description: '...'
-                  state: 1
                   extractable: false
-                  crn: '...'
+                  name: Root-key
+                  state: 1
+                  type: application/vnd.ibm.kms.key+json
               schema:
-                oneOf:
-                - $ref: '#/components/schemas/CreateKey'
-                - $ref: '#/components/schemas/ImportKey'
-                - $ref: '#/components/schemas/ImportKeyWithImportToken'
+                type: object
           description: The key was successfully created.
         400:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Bad Request: The key is missing a required field.'
               schema:
@@ -500,8 +861,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -518,8 +879,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -532,8 +893,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Conflict: The import token that was used to encrypt
                   this key has reached its  `maxAllowedRetrievals` or `expirationDate`,
@@ -553,8 +914,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -566,8 +927,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -586,10 +947,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl -X POST \
@@ -611,11 +970,11 @@ paths:
                       }
                     ]
                   }'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -649,11 +1008,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - "import requests\n\nurl = \"https://<region>.kms.cloud.ibm.com/api/v2/keys\"\
                 \n\npayload = {\n  \"metadata\": {\n    \"collectionType\": \"application/vnd.ibm.kms.key+json\"\
@@ -665,6 +1024,8 @@ paths:
                 prefer\": \"return=representation\",\n  \"content-type\": \"application/vnd.ibm.kms.key_action+json\"\
                 \n}\n\nresponse = requests.request(\"POST\", url, data=payload, headers=headers)\n\
                 \nprint(response.text)"
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: header
         name: Authorization
@@ -690,6 +1051,7 @@ paths:
               }
             ]
           }
+      x-codegen-request-body-name: body
   /api/v2/keys/{id}:
     delete:
       description: "Deletes a key by specifying the ID of the key.\n  \n**Important:**\
@@ -698,30 +1060,23 @@ paths:
       operationId: deleteKey
       parameters:
       - description: The v4 UUID that uniquely identifies the key.
-        explode: false
         in: path
         name: id
         required: true
         schema:
           type: string
-        style: simple
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       - description: "Alters server behavior for POST or DELETE operations. A header\
           \ with `return=minimal` causes the service to  return only the key identifier,\
           \ or metadata. A header containing `return=representation` returns both\
@@ -730,46 +1085,44 @@ paths:
           \  \n  \n**Note:** During POST operations, Key Protect may not immediately\
           \ return the key material due to key generation time. To retrieve the key\
           \ material, you can perform a subsequent `GET /keys/{id}` request."
-        explode: false
         in: header
         name: Prefer
-        required: false
         schema:
           enum:
           - return=representation
           - return=minimal
           type: string
-        style: simple
       responses:
         200:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.key+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.key+json
                 resources:
-                - type: application/vnd.ibm.kms.key+json
-                  name: Root-key
-                  description: '...'
-                  state: 5
-                  extractable: false
-                  crn: '...'
+                - crn: '...'
                   deleted: true
-                  deletionDate: YYYY-MM-DDTHH:MM:SSZ
                   deletedBy: '...'
+                  deletionDate: YYYY-MM-DDTHH:MM:SSZ
+                  description: '...'
+                  extractable: false
+                  name: Root-key
+                  state: 5
+                  type: application/vnd.ibm.kms.key+json
               schema:
                 $ref: '#/components/schemas/DeleteKey'
           description: The key was successfully deleted.
         204:
+          content: {}
           description: The key was deleted.
         400:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Bad Request: The key cannot be deleted due to a malformed,
                     invalid, or missing ID.'
@@ -782,8 +1135,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -800,8 +1153,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -814,8 +1167,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Not Found: They key could not be found.'
               schema:
@@ -826,8 +1179,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Gone: The requested key was previously deleted and
                   is no longer available. Please delete  references to this key.'''
@@ -840,8 +1193,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -853,8 +1206,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -873,10 +1226,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl -X DELETE \
@@ -884,11 +1235,11 @@ paths:
                   -H 'authorization: Bearer <IAM_token>' \
                   -H 'bluemix-instance: <instance_ID>' \
                   -H 'accept: application/vnd.ibm.kms.key+json'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -905,11 +1256,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - |-
                 import requests
@@ -925,6 +1276,8 @@ paths:
                 response = requests.request("DELETE", url, headers=headers)
 
                 print(response.text)
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: path
         name: id
@@ -940,49 +1293,42 @@ paths:
       operationId: getKey
       parameters:
       - description: The v4 UUID that uniquely identifies the key.
-        explode: false
         in: path
         name: id
         required: true
         schema:
           type: string
-        style: simple
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       responses:
         200:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.key+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.key+json
                 resources:
-                - type: application/vnd.ibm.kms.key+json
-                  name: Standard-key
-                  id: '...'
-                  description: '...'
-                  state: 1
-                  extractable: true
-                  createdBy: '...'
+                - createdBy: '...'
                   creationDate: YYYY-MM-DDTHH:MM:SSZ
                   crn: '...'
+                  description: '...'
+                  extractable: true
+                  id: '...'
+                  name: Standard-key
                   payload: '...'
+                  state: 1
+                  type: application/vnd.ibm.kms.key+json
               schema:
                 $ref: '#/components/schemas/GetKey'
           description: The key was successfully retrieved.
@@ -991,8 +1337,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Bad Request: The key could not be retrieved due to a
                     malformed, invalid, or missing ID.'
@@ -1005,8 +1351,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -1023,8 +1369,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -1037,8 +1383,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Not Found: The key could not be found. Verify that the
                     key ID specified is valid.'
@@ -1051,8 +1397,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -1064,8 +1410,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -1084,10 +1430,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl GET \
@@ -1095,11 +1439,11 @@ paths:
                   -H 'authorization: Bearer <IAM_token>' \
                   -H 'bluemix-instance: <instance_ID>' \
                   -H 'accept: application/vnd.ibm.kms.key+json'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -1116,11 +1460,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - |-
                 import requests
@@ -1136,6 +1480,8 @@ paths:
                 response = requests.request('GET', url, headers=headers)
 
                 print(response.text)
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: path
         name: id
@@ -1158,15 +1504,12 @@ paths:
       parameters:
       - description: The root key that is used as the wrapping key. It must be a v4
           UUID for an active key.
-        explode: false
         in: path
         name: id
         required: true
         schema:
           type: string
-        style: simple
       - description: The action to perform on the specified key.
-        explode: true
         in: query
         name: action
         required: true
@@ -1177,24 +1520,18 @@ paths:
           - rotate
           - rewrap
           type: string
-        style: form
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       - description: "Alters server behavior for POST or DELETE operations. A header\
           \ with `return=minimal` causes the service to  return only the key identifier,\
           \ or metadata. A header containing `return=representation` returns both\
@@ -1203,41 +1540,37 @@ paths:
           \  \n  \n**Note:** During POST operations, Key Protect may not immediately\
           \ return the key material due to key generation time. To retrieve the key\
           \ material, you can perform a subsequent `GET /keys/{id}` request."
-        explode: false
         in: header
         name: Prefer
-        required: false
         schema:
           enum:
           - return=representation
           - return=minimal
           type: string
-        style: simple
       requestBody:
-        $ref: '#/components/requestBodies/KeyActionBody'
+        content:
+          application/vnd.ibm.kms.key_action+json:
+            schema:
+              type: object
+        description: The base request for key actions.
+        required: true
       responses:
         200:
           content:
             application/json:
-              examples:
-                Wrap key:
-                  value:
-                    plaintext: tF9ss0W9HQUVkddcjSeGg/MqZFs2CVh/FFKLPLLnOwY=
-                    ciphertext: eyJjaXBoZXJ0ZXh0Ijoic1ZZRnZVcjdQanZXQ0tFakMwRFFWZktqQ3AyRmtiOFJOSDJSTkpZRzVmU1hWNDJScDRDVythU0h3Y009IiwiaGFzaCI6IjVWNzNBbm9XdUxxM1BvZEZpd1AxQTdQMUZrTkZOajVPMmtmMkNxdVBxL0NRdFlOZnBvempiYUxjRDNCSWhxOGpKZ2JNR0xhMHB4dDA4cTYyc0RJMGRBPT0iLCJpdiI6Ilc1T2tNWFZuWDFCTERDUk51M05EUlE9PSIsInZlcnNpb24iOiIzLjAuMCIsImhhbmRsZSI6IjRkZjg5ZGVlLWU3OTMtNGY5Ny05MGNjLTc1ZWQ5YjZlNWM4MiJ9
               schema:
-                oneOf:
-                - $ref: '#/components/schemas/WrapKey'
-                - $ref: '#/components/schemas/UnwrapKey'
+                type: object
           description: Successful key operation.
         204:
+          content: {}
           description: Successful key operation. Your key was successfully rotated.
         400:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Bad Request: Your authentication data or key is invalid,
                   or the entity-body is missing a  required field.'''
@@ -1250,8 +1583,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -1268,8 +1601,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -1282,8 +1615,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Not Found: They key could not be found.'
               schema:
@@ -1294,8 +1627,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Conflict: The key is not in an active state, so any
                   KeyAction will fail. Check the key''s nonactiveStateReason to understand
@@ -1309,8 +1642,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Gone: The requested key was previously deleted and
                   is no longer available. Please delete  references to this key.'''
@@ -1323,8 +1656,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unprocessable Entity: The ciphertext provided for the
                   unwrap operation was not wrapped by  this key.'''
@@ -1337,8 +1670,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -1350,8 +1683,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -1370,10 +1703,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - "curl -X POST \\\n  https://<region>.kms.cloud.ibm.com/api/v2/keys/<key_ID>?action=wrap\
                 \ \\\n  -H 'authorization: Bearer <IAM_token>' \\\n  -H 'bluemix-instance:\
@@ -1381,11 +1712,11 @@ paths:
                 \ \\\n  -H 'content-type: application/vnd.ibm.kms.key_action+json'\
                 \ \\\n  -d '{ \n    \"plaintext\": \"<data_key>\", \n    \"aad\":\
                 \ [\"<additional_data>\", \"<additional_data>\"] \n  }'"
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -1412,11 +1743,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - "import requests\n\nurl = \"https://<region>.kms.cloud.ibm.com/api/v2/keys/<key_ID>\"\
                 \n\nquerystring = {\n  \"action\": \"wrap\"\n  }\n\npayload = {\n\
@@ -1428,6 +1759,8 @@ paths:
                 \ \"application/vnd.ibm.kms.key_action+json\"\n    }\n\nresponse =\
                 \ requests.request(\"POST\", url, data=payload, headers=headers, params=querystring)\n\
                 \nprint(response.text)"
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: path
         name: id
@@ -1446,6 +1779,7 @@ paths:
         value:
         - "{ \n  \"plaintext\": \"tF9ss0W9HQUVkddcjSeGg/MqZFs2CVh/FFKLPLLnOwY=\",\
           \ \n  \"aad\": [\"data1\", \"data2\"] \n}"
+      x-codegen-request-body-name: body
   /api/v2/keys/{id}/policies:
     get:
       description: Retrieves a list of policies that are associated with a specified
@@ -1453,47 +1787,40 @@ paths:
       operationId: getPolicy
       parameters:
       - description: The v4 UUID that uniquely identifies the key.
-        explode: false
         in: path
         name: id
         required: true
         schema:
           type: string
-        style: simple
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       responses:
         200:
           content:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.policy+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.policy+json
                 resources:
-                - id: application/vnd.ibm.kms.key+json
+                - createdBy: '...'
+                  creationDate: '...'
                   crn: '...'
+                  id: application/vnd.ibm.kms.key+json
+                  lastUpdateDate: '...'
                   rotation:
                     interval_month: 3
-                  createdBy: '...'
-                  creationDate: '...'
                   updatedBy: '...'
-                  lastUpdateDate: '...'
               schema:
                 $ref: '#/components/schemas/CreatePolicy'
           description: The policies resource was successfuly retrieved
@@ -1509,8 +1836,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -1527,8 +1854,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -1541,8 +1868,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Not Found: They key could not be found.'
               schema:
@@ -1553,8 +1880,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -1566,8 +1893,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -1586,10 +1913,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl GET \
@@ -1597,11 +1922,11 @@ paths:
                   -H 'authorization: Bearer <IAM_token>' \
                   -H 'bluemix-instance: <instance_ID>' \
                   -H 'accept: application/vnd.ibm.kms.policy+json'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -1618,11 +1943,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - |-
                 import requests
@@ -1638,6 +1963,8 @@ paths:
                 response = requests.request('GET', url, headers=headers)
 
                 print(response.text)
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: path
         name: id
@@ -1653,30 +1980,23 @@ paths:
       operationId: putPolicy
       parameters:
       - description: The v4 UUID that uniquely identifies the key.
-        explode: false
         in: path
         name: id
         required: true
         schema:
           type: string
-        style: simple
       - description: The IBM Cloud instance ID that identifies your Key Protect service
           instance.
-        explode: false
         in: header
         name: Bluemix-Instance
         required: true
         schema:
           type: string
-        style: simple
       - description: The v4 UUID used to correlate and track transactions.
-        explode: false
         in: header
         name: Correlation-Id
-        required: false
         schema:
           type: string
-        style: simple
       requestBody:
         content:
           application/vnd.ibm.kms.key+json:
@@ -1690,21 +2010,22 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.policy+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.policy+json
                 resources:
-                - id: '...'
+                - createdBy: '...'
+                  creationDate: '...'
                   crn: '...'
+                  id: '...'
+                  lastUpdateDate: '...'
                   rotation:
                     interval_month: 3
-                  createdBy: '...'
-                  creationDate: '...'
                   updatedBy: '...'
-                  lastUpdateDate: '...'
               schema:
                 $ref: '#/components/schemas/CreatePolicy'
           description: The policy was successfully replaced.
         204:
+          content: {}
           description: The policy was updated.
         400:
           content:
@@ -1718,8 +2039,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
                   have the necessary permissions to make this request. Verify that
@@ -1736,8 +2057,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
                     to access this resource.'
@@ -1750,8 +2071,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Gone: The requested key was previously deleted and
                   is no longer available. Please delete  references to this key.'''
@@ -1764,8 +2085,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - errorMsg: 'Too Many Requests: Please wait a few minutes and try
                     again.'
@@ -1777,8 +2098,8 @@ paths:
             application/json:
               example:
                 metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
                   collectionTotal: 1
+                  collectionType: application/vnd.ibm.kms.error+json
                 resources:
                 - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
                   unavailable. Your request could not be  processed. Please try again
@@ -1797,10 +2118,8 @@ paths:
       x-sdk-operations:
         request-examples:
           curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
+          - example:
+            - lang: curl
               source:
               - |-
                 curl -X PUT \
@@ -1822,11 +2141,11 @@ paths:
                       }
                     ]
                   }'
+              type: code
+            name: Example request
           javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
+          - example:
+            - lang: javascript
               source:
               - |-
                 var settings = {
@@ -1859,11 +2178,11 @@ paths:
                 $.ajax(settings).done(function (response) {
                   console.log(response);
                 });
+              type: code
+            name: Example request
           python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
+          - example:
+            - lang: python
               source:
               - "import requests\n\nurl = \"https://<region>.kms.cloud.ibm.com/api/v2/keys\"\
                 \n\npayload = {\n  \"metadata\": {\n    \"collectionType\": \"application/vnd.ibm.kms.policy+json\"\
@@ -1874,6 +2193,8 @@ paths:
                 ,\n  \"bluemix-instance\": \"<instance_ID>\",\n  \"content-type\"\
                 : \"application/vnd.ibm.kms.policy+json\"\n}\n\nresponse = requests.request(\"\
                 PUT\", url, data=payload, headers=headers)\n\nprint(response.text)"
+              type: code
+            name: Example request
       x-try-it-out-example:
       - in: path
         name: id
@@ -1902,671 +2223,8 @@ paths:
               }
             ]
           }
-  /api/v2/import_token:
-    get:
-      description: "Retrieves the import token that is associated with your service\
-        \ instance.\n  \nWhen you call `GET /import_token`, Key Protect returns the\
-        \ public key that you can use to encrypt and import key material to the service,\
-        \ along with details about the key. \n  \n**Note:** After you reach the `maxAllowedRetrievals`\
-        \ or `expirationDate` for the import token, the import token and its associated\
-        \ public key can no longer be used for key operations. To create a new import\
-        \ token, use  `POST /import_token`."
-      operationId: getImportToken
-      parameters:
-      - description: The IBM Cloud instance ID that identifies your Key Protect service
-          instance.
-        explode: false
-        in: header
-        name: Bluemix-Instance
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: The v4 UUID used to correlate and track transactions.
-        explode: false
-        in: header
-        name: Correlation-Id
-        required: false
-        schema:
-          type: string
-        style: simple
-      responses:
-        200:
-          content:
-            application/vnd.ibm.kms.import_token+json:
-              example:
-                creationDate: YYYY-MM-DDTHH:MM:SSZ
-                expirationDate: YYYY-MM-DDTHH:MM:SSZ
-                maxAllowedRetrievals: 10
-                remainingRetrievals: 9
-                payload: '...'
-                nonce: '...'
-              schema:
-                $ref: '#/components/schemas/GetImportToken'
-          description: The import token was successfully retrieved.
-        401:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
-                  have the necessary permissions to make this request. Verify that
-                  the given IBM Cloud access token and instance ID are correct. If
-                  the error  persists, contact the account owner to check your permissions.'''
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: Your credentials are invalid or do not have the necessary permissions
-            to make this request. Verify that the  given IBM Cloud access token and
-            instance ID are correct. If the error persists, contact the account owner
-            to check your permissions.
-        403:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
-                    to access this resource.'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: Your IBM Cloud access token is not authorized to access this
-            resource.
-        404:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - 'errorMsg: ''Not found: An import token was not found in the specified
-                  service instance. To  create an import token, use `POST /import_token`'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: An import token was not found in the specified service instance.
-            To create an import token, use  `POST /import_token`
-        409:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - 'errorMsg: ''Conflict: The import token has reached its `maxAllowedRetrievals`
-                  or `expirationDate`. To  create a new import token, use `POST /import_token`. '
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: "The import token has reached its `maxAllowedRetrievals` or\
-            \ `expirationDate`, and it is no longer available for use. To create a\
-            \ new import token, use `POST /import_token`.\n  \nIn very rare cases,\
-            \ the import token may expire before its expiration time. Ensure that\
-            \ your client application is configured with a retry mechanism for catching\
-            \ and responding to `409` conflict exceptions.  "
-        429:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - errorMsg: 'Too Many Requests: Please wait a few minutes and try
-                    again.'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: Too many requests. Please wait a few minutes and try again.
-        500:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
-                  unavailable. Your request could not be  processed. Please try again
-                  later.'''
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: "IBM Key Protect is currently unavailable. Your request could\
-            \ not be processed. Please try again later. \n    \nIf the problem persists,\
-            \ note the `correlation-ID` in the response header and contact [IBM Cloud\
-            \ support](https://watson.service-now.com/wcp)."
-      security:
-      - BearerAuth: []
-      summary: Retrieve an import token
-      tags:
-      - Import tokens
-      x-sdk-operations:
-        request-examples:
-          curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
-              source:
-              - |-
-                curl GET \
-                  https://<region>.kms.cloud.ibm.com/api/v2/import_token \
-                  -H 'authorization: Bearer <IAM_token>' \
-                  -H 'bluemix-instance: <instance_ID>' \
-                  -H 'content-type: application/vnd.ibm.kms.import_token+json'
-          javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
-              source:
-              - |-
-                var settings = {
-                  "async": true,
-                  "crossDomain": true,
-                  "url": "https://<region>.kms.cloud.ibm.com/api/v2/import_token",
-                  "method": "GET",
-                  "headers": {
-                    "authorization": "Bearer <IAM_token>",
-                    "bluemix-instance": "<instance_ID>",
-                    "content-type": "application/vnd.ibm.kms.import_token+json"
-                  }
-                }
-
-                $.ajax(settings).done(function (response) {
-                  console.log(response);
-                });
-          python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
-              source:
-              - |-
-                import requests
-
-                url = "https://<region>.kms.cloud.ibm.com/api/v2/import_token"
-
-                headers = {
-                  "authorization": "Bearer <IAM_token>",
-                  "bluemix-instance": "<instance_ID>",
-                  "content-type": "application/vnd.ibm.kms.import_token+json"
-                }
-
-                response = requests.request("GET", url, headers=headers)
-
-                print(response.text)
-      x-try-it-out-example:
-      - in: header
-        name: Authorization
-        value: ""
-      - in: header
-        name: Bluemix-Instance
-        value: ""
-    post:
-      description: "Creates an import token that you can use to encrypt and import\
-        \ root keys into the service.  [Learn more](/docs/services/key-protect?topic=key-protect-importing-keys#using-import-tokens)\n\
-        \   \nWhen you call `POST /import_token`, Key Protect creates an RSA key-pair\
-        \ from its HSMs. The service encrypts and  stores the private key in the HSM,\
-        \ and returns the corresponding public key when you call `GET /import_token`.\
-        \  You can create only one import token per service instance. "
-      operationId: postImportToken
-      parameters:
-      - description: The IBM Cloud instance ID that identifies your Key Protect service
-          instance.
-        explode: false
-        in: header
-        name: Bluemix-Instance
-        required: true
-        schema:
-          type: string
-        style: simple
-      - description: The v4 UUID used to correlate and track transactions.
-        explode: false
-        in: header
-        name: Correlation-Id
-        required: false
-        schema:
-          type: string
-        style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ImportToken'
-        description: The base request to create an import token.
-        required: true
-      responses:
-        200:
-          content:
-            application/vnd.ibm.kms.import_token+json:
-              example:
-                creationDate: YYYY-MM-DDTHH:MM:SSZ
-                expirationDate: YYYY-MM-DDTHH:MM:SSZ
-                maxAllowedRetrievals: 10
-                remainingRetrievals: 10
-              schema:
-                $ref: '#/components/schemas/ImportToken'
-          description: The import token was successfully created.
-        401:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not
-                  have the necessary permissions to make this request. Verify that
-                  the given IBM Cloud access token and instance ID are correct. If
-                  the error  persists, contact the account owner to check your permissions.'''
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: Your credentials are invalid or do not have the necessary permissions
-            to make this request. Verify that the  given IBM Cloud access token and
-            instance ID are correct. If the error persists, contact the account owner
-            to check your permissions.
-        403:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
-                    to access this resource.'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: Your IBM Cloud access token is not authorized to access this
-            resource.
-        429:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - errorMsg: 'Too Many Requests: Please wait a few minutes and try
-                    again.'
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: Too many requests. Please wait a few minutes and try again.
-        500:
-          content:
-            application/json:
-              example:
-                metadata:
-                  collectionType: application/vnd.ibm.kms.error+json
-                  collectionTotal: 1
-                resources:
-                - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently
-                  unavailable. Your request could not be  processed. Please try again
-                  later.'''
-              schema:
-                $ref: '#/components/schemas/ErrorCollection'
-          description: "IBM Key Protect is currently unavailable. Your request could\
-            \ not be processed. Please try again later. \n    \nIf the problem persists,\
-            \ note the `correlation-ID` in the response header and contact [IBM Cloud\
-            \ support](https://watson.service-now.com/wcp)."
-      security:
-      - BearerAuth: []
-      summary: Create an import token
-      tags:
-      - Import tokens
-      x-sdk-operations:
-        request-examples:
-          curl:
-          - name: Example request
-            example:
-            - type: code
-              lang: curl
-              source:
-              - "curl -X POST \\\n  https://<region>.kms.cloud.ibm.com/api/v2/import_token\
-                \ \\\n  -H 'accept: application/vnd.ibm.collection+json' \\\n  -H\
-                \ 'authorization: Bearer <IAM_token>' \\\n  -H 'bluemix-instance:\
-                \ <instance_ID>' \\\n  -H 'content-type: application/json' \\\n  -d\
-                \ '{ \n    \"expiration\": <expiration_time>, \\\n    \"maxAllowedRetrievals\"\
-                : <use_count> \n  }'"
-          javascript:
-          - name: Example request
-            example:
-            - type: code
-              lang: javascript
-              source:
-              - |-
-                var settings = {
-                  "async": true,
-                  "crossDomain": true,
-                  "url": "https://<region>.kms.cloud.ibm.com/api/v2/import_token",
-                  "method": "POST",
-                  "headers": {
-                    "accept": "application/vnd.ibm.collection+json",
-                    "authorization": "Bearer <IAM_token>",
-                    "bluemix-instance": "<instance_ID>",
-                    "content-type": "application/json"
-                  },
-                  "processData": false,
-                  "data": {
-                    "expiration": <expiration_time>,
-                    "maxAllowedRetrievals": <use_count>
-                  }
-                }
-
-                $.ajax(settings).done(function (response) {
-                  console.log(response);
-                });
-          python:
-          - name: Example request
-            example:
-            - type: code
-              lang: python
-              source:
-              - "import requests\n\nurl = \"https://<region>.kms.cloud.ibm.com/api/v2/import_token\"\
-                \n\npayload = {\n  \"expiration\": <expiration_time>,\n  \"maxAllowedRetrievals\"\
-                : <use_count>\n  }\n  \nheaders = {\n  \"accept\": \"application/vnd.ibm.collection+json\"\
-                ,\n  \"authorization\": \"Bearer <IAM_token>\",\n  \"bluemix-instance\"\
-                : \"<instance_ID>\",\n  \"content-type\": \"application/json\"\n \
-                \ }\n\nresponse = requests.request(\"POST\", url, data=payload, headers=headers)\n\
-                \nprint(response.text)"
-      x-try-it-out-example:
-      - in: header
-        name: Authorization
-        value: ""
-      - in: header
-        name: Bluemix-Instance
-        value: ""
+      x-codegen-request-body-name: body
 components:
-  examples:
-    CreateRootKey:
-      value:
-        metadata:
-          collectionType: application/vnd.ibm.kms.key+json
-          collectionTotal: 1
-        resources:
-        - type: application/vnd.ibm.kms.key+json
-          name: Root-key
-          description: '...'
-          extractable: false
-    ImportRootKey:
-      value:
-        metadata:
-          collectionType: application/vnd.ibm.kms.key+json
-          collectionTotal: 1
-        resources:
-        - type: application/vnd.ibm.kms.key+json
-          name: Imported-root-key
-          description: '...'
-          extractable: false
-          payload: '...'
-    ImportRootKeyWithImportToken:
-      value:
-        metadata:
-          collectionType: application/vnd.ibm.kms.key+json
-          collectionTotal: 1
-        resources:
-        - type: application/vnd.ibm.kms.key+json
-          name: Encrypted-root-key
-          description: '...'
-          extractable: false
-          payload: '...'
-          encryptionAlgorithm: ' '
-          encryptedNonce: '...'
-          iv: '...'
-    WrapKey:
-      value:
-        plaintext: <data_key>
-        aad:
-        - <additional_data>
-        - <additional_data>
-    UnwrapKey:
-      value:
-        ciphertext: <encrypted_data_key>
-        aad:
-        - <additional_data>
-        - <additional_data>
-    RewrapKey:
-      value:
-        ciphertext: <encrypted_data_key>
-        aad:
-        - <additional_data>
-        - <additional_data>
-    RotateKey:
-      value:
-        payload: <new_data_key>
-    CreatePolicy:
-      value:
-        metadata:
-          collectionType: application/vnd.ibm.kms.policy+json
-          collectionTotal: 1
-        resources:
-        - type: application/vnd.ibm.kms.policy+json
-          rotation: 1
-    UpdatePolicy:
-      value:
-        metadata:
-          collectionType: application/vnd.ibm.kms.policy+json
-          collectionTotal: 1
-        resources:
-        - type: application/vnd.ibm.kms.policy+json
-          rotation: 2
-  parameters:
-    KeyId:
-      description: The v4 UUID that uniquely identifies the key.
-      explode: false
-      in: path
-      name: id
-      required: true
-      schema:
-        type: string
-      style: simple
-    LimitParam:
-      description: "The number of keys to retrieve. By default, `GET /keys` returns\
-        \ the first 200 keys. To retrieve a different set of keys, use `limit` with\
-        \ `offset` to page through your available resources. The maximum value for\
-        \ `limit` is 5000.\n  \n**Usage:** If you have 20 keys in your instance, and\
-        \ you want to retrieve only the first 5 keys, use  `../keys?limit=5`."
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 200
-        maximum: 5000
-        minimum: 1
-        type: integer
-      style: form
-    OffsetParam:
-      description: "The number of keys to skip. By specifying `offset`, you retrieve\
-        \ a subset of keys that starts with the `offset` value. Use `offset` with\
-        \ `limit` to page through your available resources.\n  \n**Usage:** If you\
-        \ have 100 keys in your instance, and you want to retrieve keys 26 through\
-        \ 50, use  `../keys?offset=25&limit=25`.    "
-      explode: true
-      in: query
-      name: offset
-      required: false
-      schema:
-        default: 0
-        minimum: 0
-        type: integer
-      style: form
-    InstanceParam:
-      description: The IBM Cloud instance ID that identifies your Key Protect service
-        instance.
-      explode: false
-      in: header
-      name: Bluemix-Instance
-      required: true
-      schema:
-        type: string
-      style: simple
-    CorrelationId:
-      description: The v4 UUID used to correlate and track transactions.
-      explode: false
-      in: header
-      name: Correlation-Id
-      required: false
-      schema:
-        type: string
-      style: simple
-    Prefer:
-      description: "Alters server behavior for POST or DELETE operations. A header\
-        \ with `return=minimal` causes the service to  return only the key identifier,\
-        \ or metadata. A header containing `return=representation` returns both the\
-        \ key  material and metadata in the response entity-body. If the key has been\
-        \ designated as a root key, the  system cannot return the key material.  \n\
-        \  \n**Note:** During POST operations, Key Protect may not immediately return\
-        \ the key material due to key generation time. To retrieve the key material,\
-        \ you can perform a subsequent `GET /keys/{id}` request."
-      explode: false
-      in: header
-      name: Prefer
-      required: false
-      schema:
-        enum:
-        - return=representation
-        - return=minimal
-        type: string
-      style: simple
-  requestBodies:
-    CreateKeyBody:
-      content:
-        application/vnd.ibm.kms.key+json:
-          examples:
-            Create root key:
-              $ref: '#/components/examples/CreateRootKey'
-            Import root key:
-              $ref: '#/components/examples/ImportRootKey'
-            Import root key using an import token:
-              $ref: '#/components/examples/ImportRootKeyWithImportToken'
-          schema:
-            oneOf:
-            - $ref: '#/components/schemas/CreateKey'
-            - $ref: '#/components/schemas/ImportKey'
-            - $ref: '#/components/schemas/ImportKeyWithImportToken'
-      description: The base request for creating a new key.
-      required: true
-    KeyActionBody:
-      content:
-        application/vnd.ibm.kms.key_action+json:
-          examples:
-            Wrap key:
-              $ref: '#/components/examples/WrapKey'
-            Unwrap key:
-              $ref: '#/components/examples/UnwrapKey'
-            Rotate key:
-              $ref: '#/components/examples/RotateKey'
-          schema:
-            oneOf:
-            - $ref: '#/components/schemas/WrapKey'
-            - $ref: '#/components/schemas/UnwrapKey'
-            - $ref: '#/components/schemas/RotateKey'
-      description: The base request for key actions.
-      required: true
-    CreatePolicyBody:
-      content:
-        application/vnd.ibm.kms.key+json:
-          schema:
-            $ref: '#/components/schemas/CreatePolicy'
-      description: The base request for creating a new policy associated with a key.
-      required: true
-    CreateImportTokenBody:
-      content:
-        application/vnd.ibm.kms.import_token+json:
-          schema:
-            $ref: '#/components/schemas/ImportToken'
-      description: The base request for creating an import token.
-      required: true
-  responses:
-    Unauthorized:
-      content:
-        application/json:
-          example:
-            metadata:
-              collectionType: application/vnd.ibm.kms.error+json
-              collectionTotal: 1
-            resources:
-            - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not have
-              the necessary permissions to make this request. Verify that the given
-              IBM Cloud access token and instance ID are correct. If the error  persists,
-              contact the account owner to check your permissions.'''
-          schema:
-            $ref: '#/components/schemas/ErrorCollection'
-      description: Your credentials are invalid or do not have the necessary permissions
-        to make this request. Verify that the  given IBM Cloud access token and instance
-        ID are correct. If the error persists, contact the account owner to check
-        your permissions.
-    Forbidden:
-      content:
-        application/json:
-          example:
-            metadata:
-              collectionType: application/vnd.ibm.kms.error+json
-              collectionTotal: 1
-            resources:
-            - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized
-                to access this resource.'
-          schema:
-            $ref: '#/components/schemas/ErrorCollection'
-      description: Your IBM Cloud access token is not authorized to access this resource.
-    NotFound:
-      content:
-        application/json:
-          example:
-            metadata:
-              collectionType: application/vnd.ibm.kms.error+json
-              collectionTotal: 1
-            resources:
-            - errorMsg: 'Not Found: They key could not be found.'
-          schema:
-            $ref: '#/components/schemas/ErrorCollection'
-      description: The key could not be found.
-    Gone:
-      content:
-        application/json:
-          example:
-            metadata:
-              collectionType: application/vnd.ibm.kms.error+json
-              collectionTotal: 1
-            resources:
-            - 'errorMsg: ''Gone: The requested key was previously deleted and is no
-              longer available. Please delete  references to this key.'''
-          schema:
-            $ref: '#/components/schemas/ErrorCollection'
-      description: The requested key was previously deleted and is no longer available.
-        Please delete references to this key.
-    TooManyRequests:
-      content:
-        application/json:
-          example:
-            metadata:
-              collectionType: application/vnd.ibm.kms.error+json
-              collectionTotal: 1
-            resources:
-            - errorMsg: 'Too Many Requests: Please wait a few minutes and try again.'
-          schema:
-            $ref: '#/components/schemas/ErrorCollection'
-      description: Too many requests. Please wait a few minutes and try again.
-    InternalServerError:
-      content:
-        application/json:
-          example:
-            metadata:
-              collectionType: application/vnd.ibm.kms.error+json
-              collectionTotal: 1
-            resources:
-            - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently unavailable.
-              Your request could not be  processed. Please try again later.'''
-          schema:
-            $ref: '#/components/schemas/ErrorCollection'
-      description: "IBM Key Protect is currently unavailable. Your request could not\
-        \ be processed. Please try again later. \n    \nIf the problem persists, note\
-        \ the `correlation-ID` in the response header and contact [IBM Cloud support](https://watson.service-now.com/wcp)."
   schemas:
     CollectionMetadata:
       description: The metadata that describes the resource array.
@@ -2574,14 +2232,14 @@ components:
         collectionType: application/vnd.ibm.kms.key+json
         collectionTotal: 0
       properties:
-        collectionType:
-          description: The type of resources in the resource array.
-          example: application/vnd.ibm.kms.key+json
-          type: string
         collectionTotal:
           description: The number of elements in the resource array.
           format: int64
           type: integer
+        collectionType:
+          description: The type of resources in the resource array.
+          example: application/vnd.ibm.kms.key+json
+          type: string
       required:
       - collectionTotal
       - collectionType
@@ -2595,218 +2253,13 @@ components:
           description: An array of resources.
           items:
             allOf:
-            - $ref: '#/components/schemas/Key'
+            - $ref: '#/definitions/Key'
             type: object
           type: array
       required:
       - metadata
       - resources
-    ImportKey:
-      description: The base schema for importing keys.
-      properties:
-        metadata:
-          $ref: '#/components/schemas/CollectionMetadata'
-        resources:
-          description: An array of resources.
-          items:
-            allOf:
-            - $ref: '#/components/schemas/Key'
-            - properties:
-                payload:
-                  description: "The key material that you want to store and manage\
-                    \ in the service.   \n  \nTo import a key, provide a base64 encoded\
-                    \ payload in the request entity-body. If you're importing  a root\
-                    \ key, ensure that the key is 128, 192, or 256 bits in length.\
-                    \ \n  \n**Note:**  By default, Key Protect encrypts your key material\
-                    \ while it's in transit by using the  Transport Layer Security\
-                    \ (TLS) 1.2 protocol. If your workload requires a security mechanism\
-                    \ beyond  TLS, you can use an import token to encrypt and import\
-                    \ root keys to the service.  [Learn more](/docs/services/key-protect?topic=key-protect-importing-keys#using-import-tokens)"
-                  format: binary
-                  type: string
-                  writeOnly: true
-              required:
-              - payload
-              type: object
-            type: object
-          type: array
-      required:
-      - metadata
-      - resources
-    ImportKeyWithImportToken:
-      description: The base schema for importing keys with an import token.
-      properties:
-        metadata:
-          $ref: '#/components/schemas/CollectionMetadata'
-        resources:
-          description: An array of resources.
-          items:
-            allOf:
-            - $ref: '#/components/schemas/Key'
-            - $ref: '#/components/schemas/SecureImport'
-            type: object
-          type: array
-      required:
-      - metadata
-      - resources
-    ListKeys:
-      description: The base schema for listing keys.
-      example:
-        metadata:
-          collectionType: application/vnd.ibm.kms.key+json
-          collectionTotal: 0
-        resources:
-          resources:
-          - type: application/vnd.ibm.kms.key+json
-            name: Root-key
-            id: '...'
-            description: '...'
-            state: 1
-            extractable: false
-            createdBy: '...'
-            creationDate: YYYY-MM-DDTHH:MM:SSZ
-            crn: '...'
-          - type: application/vnd.ibm.kms.key+json
-            name: Standard-key
-            id: '...'
-            description: '...'
-            state: 1
-            extractable: true
-            createdBy: '...'
-            creationDate: YYYY-MM-DDTHH:MM:SSZ
-            crn: '...'
-      properties:
-        metadata:
-          $ref: '#/components/schemas/CollectionMetadata'
-        resources:
-          description: An array of resources.
-          example:
-            resources:
-            - type: application/vnd.ibm.kms.key+json
-              name: Root-key
-              id: '...'
-              description: '...'
-              state: 1
-              extractable: false
-              createdBy: '...'
-              creationDate: YYYY-MM-DDTHH:MM:SSZ
-              crn: '...'
-            - type: application/vnd.ibm.kms.key+json
-              name: Standard-key
-              id: '...'
-              description: '...'
-              state: 1
-              extractable: true
-              createdBy: '...'
-              creationDate: YYYY-MM-DDTHH:MM:SSZ
-              crn: '...'
-          items:
-            allOf:
-            - $ref: '#/components/schemas/Key'
-            - $ref: '#/components/schemas/KeyMetadata'
-            type: object
-          type: array
-      required:
-      - metadata
-      - resources
-    GetKey:
-      description: The base schema for retrieving keys.
-      example:
-        metadata:
-          collectionType: application/vnd.ibm.kms.key+json
-          collectionTotal: 0
-        resources:
-          resources:
-          - type: application/vnd.ibm.kms.key+json
-            name: Standard-key
-            id: '...'
-            description: '...'
-            state: 1
-            extractable: true
-            createdBy: '...'
-            creationDate: YYYY-MM-DDTHH:MM:SSZ
-            crn: '...'
-            payload: '...'
-      properties:
-        metadata:
-          $ref: '#/components/schemas/CollectionMetadata'
-        resources:
-          description: An array of resources.
-          example:
-            resources:
-            - type: application/vnd.ibm.kms.key+json
-              name: Standard-key
-              id: '...'
-              description: '...'
-              state: 1
-              extractable: true
-              createdBy: '...'
-              creationDate: YYYY-MM-DDTHH:MM:SSZ
-              crn: '...'
-              payload: '...'
-          items:
-            allOf:
-            - $ref: '#/components/schemas/Key'
-            - $ref: '#/components/schemas/KeyMetadata'
-            - properties:
-                payload:
-                  description: "The retrieved key material that you can export to\
-                    \ external apps or services.    \n      \n**Note:** If the key\
-                    \ has been designated as a root key, the system cannot return\
-                    \ the key material. "
-                  format: binary
-                  type: string
-              type: object
-            type: object
-          type: array
-      required:
-      - metadata
-      - resources
-    GetImportToken:
-      allOf:
-      - $ref: '#/components/schemas/ImportToken'
-      - $ref: '#/components/schemas/GetImportToken_allOf'
-      description: The base schema for retrieving an import token.
-    DeleteKey:
-      description: The base schema for deleting keys.
-      example:
-        metadata:
-          collectionType: application/vnd.ibm.kms.key+json
-          collectionTotal: 0
-        resources:
-        - '{}'
-        - '{}'
-      properties:
-        metadata:
-          $ref: '#/components/schemas/CollectionMetadata'
-        resources:
-          description: An array of resources.
-          items:
-            allOf:
-            - $ref: '#/components/schemas/KeyMetadata'
-            - properties:
-                deleted:
-                  description: The boolean value that determines whether the key has
-                    been deleted.
-                  readOnly: true
-                  type: boolean
-                deletionDate:
-                  description: The date the key material was destroyed. The date format
-                    follows RFC 3339.
-                  format: date-time
-                  readOnly: true
-                  type: string
-                deletedBy:
-                  description: The unique identifier for the resource that deleted
-                    the key.
-                  readOnly: true
-                  type: string
-              type: object
-            type: object
-          type: array
-      required:
-      - metadata
-      - resources
+      type: object
     CreatePolicy:
       description: The base schema for creating policies.
       example:
@@ -2823,12 +2276,62 @@ components:
           description: An array of resources.
           items:
             allOf:
-            - $ref: '#/components/schemas/Policy'
+            - $ref: '#/definitions/Policy'
             type: object
           type: array
       required:
       - metadata
       - resources
+      type: object
+    DeleteKey:
+      description: The base schema for deleting keys.
+      example:
+        metadata:
+          collectionType: application/vnd.ibm.kms.key+json
+          collectionTotal: 0
+        resources:
+        - '{}'
+        - '{}'
+      properties:
+        metadata:
+          $ref: '#/components/schemas/CollectionMetadata'
+        resources:
+          description: An array of resources.
+          items:
+            allOf:
+            - $ref: '#/definitions/KeyMetadata'
+            - properties:
+                deleted:
+                  description: The boolean value that determines whether the key has
+                    been deleted.
+                  readOnly: true
+                  type: boolean
+                deletedBy:
+                  description: The unique identifier for the resource that deleted
+                    the key.
+                  readOnly: true
+                  type: string
+                deletionDate:
+                  description: The date the key material was destroyed. The date format
+                    follows RFC 3339.
+                  format: date-time
+                  readOnly: true
+                  type: string
+              type: object
+            type: object
+          type: array
+      required:
+      - metadata
+      - resources
+      type: object
+    Error:
+      properties:
+        errorMsg:
+          description: The conditions for an error response.
+          type: string
+      required:
+      - errorMsg
+      type: object
     ErrorCollection:
       description: The base schema for error responses.
       properties:
@@ -2842,88 +2345,114 @@ components:
       required:
       - metadata
       - resources
-    WrapKey:
-      description: Properties that are associated with wrap actions.
-      properties:
-        plaintext:
-          description: "The data encryption key (DEK) used in wrap actions when the\
-            \ query parameter is set to `wrap`. The system returns a base64 encoded\
-            \ plaintext in the response entity-body when you perform an `unwrap` action\
-            \ on a key.\n   \nTo wrap an existing DEK, provide a base64 encoded plaintext\
-            \ during a `wrap` action. To generate a new DEK, omit the `plaintext`\
-            \ property. Key Protect generates a random plaintext (32 bytes) that is\
-            \ rooted in an HSM and then wraps that value. "
-          maxLength: 4096
-          type: string
-        aad:
-          description: "The additional authentication data (AAD) used to further secure\
-            \ the key. \n  \nIf you supply AAD when you make a `wrap` call, you must\
-            \ specify the same AAD during a subsequent `unwrap` call. "
-          items:
-            type: string
-          maxItems: 126
-          maxLength: 255
-          minItems: 0
-          minLength: 0
-          type: array
-          writeOnly: true
-        ciphertext:
-          description: The wrapped data encryption key (DEK) that you can export to
-            your app or service. The value is base64 encoded.
-          readOnly: true
-          type: string
-      required:
-      - plaintext
       type: object
-    UnwrapKey:
-      description: Properties that are associated with unwrap actions.
+    GetImportToken:
+      allOf:
+      - $ref: '#/components/schemas/ImportToken'
+      - $ref: '#/components/schemas/GetImportToken_allOf'
+      description: The base schema for retrieving an import token.
+    GetKey:
+      description: The base schema for retrieving keys.
+      example:
+        metadata:
+          collectionType: application/vnd.ibm.kms.key+json
+          collectionTotal: 0
+        resources:
+          resources:
+          - createdBy: '...'
+            creationDate: YYYY-MM-DDTHH:MM:SSZ
+            crn: '...'
+            description: '...'
+            extractable: true
+            id: '...'
+            name: Standard-key
+            payload: '...'
+            state: 1
+            type: application/vnd.ibm.kms.key+json
       properties:
-        ciphertext:
-          description: "The wrapped data encryption key (DEK) used in wrap actions\
-            \ when the query parameter is set to `unwrap`. The system requires a base64\
-            \ encoded ciphertext and returns a base64 encoded plaintext in the response\
-            \ entity-body when you perform an `unwrap` action on a key.\n     \n**Note:**\
-            \ When you unwrap a wrapped data encryption key (WDEK) by using a rotated\
-            \ root key, the service returns a new ciphertext in the response entity-body.\
-            \ Each ciphertext remains available for `unwrap` actions.  If you unwrap\
-            \ a DEK with a previous ciphertext, the service also returns the latest\
-            \ ciphertext in the response.  Use the latest ciphertext for future unwrap\
-            \ operations."
-          type: string
-        aad:
-          description: "The additional authentication data (AAD) used to further secure\
-            \ the key. \n  \nIf you supply AAD when you make a `wrap` call, you must\
-            \ specify the same AAD during a subsequent `unwrap` call. "
+        metadata:
+          $ref: '#/components/schemas/CollectionMetadata'
+        resources:
+          description: An array of resources.
+          example:
+            resources:
+            - createdBy: '...'
+              creationDate: YYYY-MM-DDTHH:MM:SSZ
+              crn: '...'
+              description: '...'
+              extractable: true
+              id: '...'
+              name: Standard-key
+              payload: '...'
+              state: 1
+              type: application/vnd.ibm.kms.key+json
           items:
-            type: string
-          maxItems: 126
-          maxLength: 255
-          minItems: 0
-          minLength: 0
+            allOf:
+            - $ref: '#/definitions/Key'
+            - $ref: '#/definitions/KeyMetadata'
+            - properties:
+                payload:
+                  description: "The retrieved key material that you can export to\
+                    \ external apps or services.    \n      \n**Note:** If the key\
+                    \ has been designated as a root key, the system cannot return\
+                    \ the key material. "
+                  format: binary
+                  type: string
+              type: object
+            type: object
           type: array
-          writeOnly: true
-        plaintext:
-          description: The original data encryption key (DEK) that was used in wrap
-            action. The value is base64 encoded.
-          maxLength: 4096
-          readOnly: true
-          type: string
       required:
-      - ciphertext
+      - metadata
+      - resources
       type: object
-    RotateKey:
-      description: Properties that are associated with wrap actions.
+    ImportKey:
+      description: The base schema for importing keys.
       properties:
-        payload:
-          description: "The key material that you want to import into the service\
-            \ for rotating an existing root key. This value is  required for a `rotate`\
-            \ action if you initially imported the key material when you created the\
-            \ key.\n   \nTo rotate an imported root key, provide a base64 encoded\
-            \ payload in the request entity-body. To rotate a root key that was initially\
-            \ generated by Key Protect, omit the `payload` property and pass in an\
-            \ empty request entity-body."
-          type: string
-          writeOnly: true
+        metadata:
+          $ref: '#/components/schemas/CollectionMetadata'
+        resources:
+          description: An array of resources.
+          items:
+            allOf:
+            - $ref: '#/definitions/Key'
+            - properties:
+                payload:
+                  description: "The key material that you want to store and manage\
+                    \ in the service.   \n  \nTo import a key, provide a base64 encoded\
+                    \ payload in the request entity-body. If you're importing  a root\
+                    \ key, ensure that the key is 128, 192, or 256 bits in length.\
+                    \ \n  \n**Note:**  By default, Key Protect encrypts your key material\
+                    \ while it's in transit by using the  Transport Layer Security\
+                    \ (TLS) 1.2 protocol. If your workload requires a security mechanism\
+                    \ beyond  TLS, you can use an import token to encrypt and import\
+                    \ root keys to the service.  [Learn more](/docs/services/key-protect?topic=key-protect-importing-keys#using-import-tokens)"
+                  format: binary
+                  type: string
+              required:
+              - payload
+              type: object
+            type: object
+          type: array
+      required:
+      - metadata
+      - resources
+      type: object
+    ImportKeyWithImportToken:
+      description: The base schema for importing keys with an import token.
+      properties:
+        metadata:
+          $ref: '#/components/schemas/CollectionMetadata'
+        resources:
+          description: An array of resources.
+          items:
+            allOf:
+            - $ref: '#/definitions/Key'
+            - $ref: '#/definitions/SecureImport'
+            type: object
+          type: array
+      required:
+      - metadata
+      - resources
       type: object
     ImportToken:
       description: Properties that are associated with import tokens.
@@ -2934,22 +2463,6 @@ components:
         creationDate: 2018-04-12T23:20:50.52Z
         expirationDate: 2018-12-01T23:20:50.52Z
       properties:
-        expiration:
-          default: 600
-          description: "The time in seconds from the creation of an import token that\
-            \ determines how long its associated public key  remains valid.\n   \n\
-            The minimum value is `300` seconds (5 minutes), and the maximum value\
-            \ is `86400` (24 hours). The default value is `600` (10 minutes)."
-          maximum: 86400
-          minimum: 300
-          type: number
-        maxAllowedRetrievals:
-          default: 1
-          description: 'The number of times that an import token can be retrieved
-            within its expiration time before it is no longer accessible. '
-          maximum: 500
-          minimum: 1
-          type: number
         creationDate:
           description: The date the import token was created. The date format follows
             RFC 3339.
@@ -2957,6 +2470,14 @@ components:
           format: date-time
           readOnly: true
           type: string
+        expiration:
+          description: "The time in seconds from the creation of an import token that\
+            \ determines how long its associated public key  remains valid.\n   \n\
+            The minimum value is `300` seconds (5 minutes), and the maximum value\
+            \ is `86400` (24 hours). The default value is `600` (10 minutes)."
+          maximum: 8.64E+4
+          minimum: 3E+2
+          type: number
         expirationDate:
           description: The date the import token expires. The date format follows
             RFC 3339.
@@ -2964,91 +2485,22 @@ components:
           format: date-time
           readOnly: true
           type: string
+        maxAllowedRetrievals:
+          description: 'The number of times that an import token can be retrieved
+            within its expiration time before it is no longer accessible. '
+          maximum: 5E+2
+          minimum: 1
+          type: number
         remainingRetrievals:
-          default: 1
           description: 'The number of retrievals that are available for the import
             token before it is no longer accessible.  '
           minimum: 1
           readOnly: true
           type: number
       type: object
-    SecureImport:
-      description: Additional properties that are associated with importing a key
-        with an import token.
-      properties:
-        payload:
-          description: "The encrypted key material that you want to store and manage\
-            \ in the service. The value must be base64 encoded.\n  \nFirst, retrieve\
-            \ the public key that is associated with your service instance by calling\
-            \ `GET /import_token`.  Then, use the public key to run RSA encryption\
-            \ on the key material that you want to import to the service."
-          format: binary
-          type: string
-          writeOnly: true
-        encryptedNonce:
-          description: "The encrypted nonce value that protects a key import request\
-            \ against replay attacks. This value must be encrypted by using the encrypted\
-            \ `payload` value that represents the key that you want to import into\
-            \ the service.\n  \nTo retrieve a nonce value, use `GET /import_token`.\
-            \ Then, encrypt the value by using an AES-GCM encryption  method that\
-            \ is compatible with your environment. "
-          format: binary
-          type: string
-          writeOnly: true
-        iv:
-          description: "The initialization vector (IV) that is generated by the AES-GCM\
-            \ algorithm when you encrypt a nonce. The IV  value is required to decrypt\
-            \ the encrypted nonce value that you provide when you make a key import\
-            \ request  to the service.\n  \nTo generate an IV, encrypt the `nonce`\
-            \ value by using an AES-GCM encryption method that is compatible with\
-            \ your environment. Then, supply the generated IV value when you import\
-            \ a key to the service."
-          format: binary
-          minLength: 12
-          type: string
-          writeOnly: true
-        encryptionAlgorithm:
-          description: The RSA encryption algorithm that is used to encrypt the key
-            material that you want to import into the  service. Currently, `RSAES_OAEP_SHA_256`
-            is supported.
-          example: RSAES_OAEP_SHA_256
-          type: string
-          writeOnly: true
-      required:
-      - encryptedNonce
-      - encryptionAlgorithm
-      - iv
-      - payload
-      type: object
     Key:
       description: Properties that describe a key.
       properties:
-        type:
-          default: application/vnd.ibm.kms.key+json
-          description: Specifies the MIME type that represents the key resource. Currently,
-            only the default is supported.
-          type: string
-        id:
-          description: The v4 UUID used to uniquely identify the resource, as specified
-            by RFC 4122.
-          readOnly: true
-          type: string
-        name:
-          description: "A unique, human-readable alias to assign to your key.\n  \n\
-            To protect your privacy, do not use personal data, such as your name or\
-            \ location, as an alias for your key."
-          maxLength: 50
-          minLength: 2
-          pattern: '[a-zA-Z0-9 ]{2,50}'
-          type: string
-        description:
-          description: "A text field used to provide a more detailed description of\
-            \ the key. The maximum length is 240 characters.\n  \nTo protect your\
-            \ privacy, do not use personal data, such as your name or location, as\
-            \ a description for your  key."
-          maxLength: 240
-          minLength: 2
-          type: string
         tags:
           description: "Up to 30 tags can be created. Tags can be between 2-30 characters,\
             \ including spaces. Special characters not permitted include the angled\
@@ -3058,18 +2510,20 @@ components:
           items:
             type: string
           type: array
-        state:
-          description: The key state based on NIST SP 800-57. States are integers
-            and correspond to the Pre-activation = 0, Active = 1, Deactivated = 3,
-            and Destroyed = 5 values.
-          enum:
-          - 1
-          - 2
-          - 3
-          - 4
-          - 5
+        crn:
+          description: The Cloud Resource Name (CRN) that uniquely identifies your
+            cloud network resources.
+          example: crn:v1:bluemix:public:kms:<region>:a/<accountId>:<instanceId>:key:<keyId>
           readOnly: true
-          type: integer
+          type: string
+        description:
+          description: "A text field used to provide a more detailed description of\
+            \ the key. The maximum length is 240 characters.\n  \nTo protect your\
+            \ privacy, do not use personal data, such as your name or location, as\
+            \ a description for your  key."
+          maxLength: 240
+          minLength: 2
+          type: string
         expirationDate:
           description: The date the key material expires. The date format follows
             RFC 3339. You can set an expiration date on any  key on its creation.
@@ -3078,7 +2532,6 @@ components:
           example: 2018-12-01T23:20:50.52Z
           format: date-time
           type: string
-          writeOnly: true
         extractable:
           default: true
           description: "A boolean value that determines whether the key material can\
@@ -3088,10 +2541,9 @@ components:
             \ you can store in your apps and services. Once set to `false` it cannot\
             \ be changed to `true`."
           type: boolean
-        crn:
-          description: The Cloud Resource Name (CRN) that uniquely identifies your
-            cloud network resources.
-          example: crn:v1:bluemix:public:kms:<region>:a/<accountId>:<instanceId>:key:<keyId>
+        id:
+          description: The v4 UUID used to uniquely identify the resource, as specified
+            by RFC 4122.
           readOnly: true
           type: string
         imported:
@@ -3105,6 +2557,25 @@ components:
             \ as it did in key creation."
           readOnly: true
           type: boolean
+        name:
+          description: "A unique, human-readable alias to assign to your key.\n  \n\
+            To protect your privacy, do not use personal data, such as your name or\
+            \ location, as an alias for your key."
+          maxLength: 50
+          minLength: 2
+          pattern: '[a-zA-Z0-9 ]{2,50}'
+          type: string
+        state:
+          description: The key state based on NIST SP 800-57. States are integers
+            and correspond to the Pre-activation = 0, Active = 1, Deactivated = 3,
+            and Destroyed = 5 values.
+          readOnly: true
+          type: integer
+        type:
+          default: application/vnd.ibm.kms.key+json
+          description: Specifies the MIME type that represents the key resource. Currently,
+            only the default is supported.
+          type: string
       required:
       - name
       - type
@@ -3112,17 +2583,8 @@ components:
     KeyMetadata:
       description: Additional properties that describe a key.
       properties:
-        creationDate:
-          description: The date the key material was created. The date format follows
-            RFC 3339.
-          example: 2018-04-12T23:20:50.52Z
-          format: date-time
-          readOnly: true
-          type: string
-        createdBy:
-          description: The unique identifier for the resource that created the key.
-          readOnly: true
-          type: string
+        algorithmMetadata:
+          $ref: '#/components/schemas/KeyMetadata_algorithmMetadata'
         algorithmType:
           default: AES
           description: The algorithm type used to generate the key. Currently, AES
@@ -3131,16 +2593,13 @@ components:
           - AES
           readOnly: true
           type: string
-        algorithmMetadata:
-          $ref: '#/components/schemas/KeyMetadata_algorithmMetadata'
-        nonactiveStateReason:
-          description: A code indicating the reason the key is not in the activation
-            state.
+        createdBy:
+          description: The unique identifier for the resource that created the key.
           readOnly: true
-          type: integer
-        lastUpdateDate:
-          description: Updates when any part of the key metadata is modified. The
-            date format follows RFC 3339.
+          type: string
+        creationDate:
+          description: The date the key material was created. The date format follows
+            RFC 3339.
           example: 2018-04-12T23:20:50.52Z
           format: date-time
           readOnly: true
@@ -3152,20 +2611,85 @@ components:
           format: date-time
           readOnly: true
           type: string
+        lastUpdateDate:
+          description: Updates when any part of the key metadata is modified. The
+            date format follows RFC 3339.
+          example: 2018-04-12T23:20:50.52Z
+          format: date-time
+          readOnly: true
+          type: string
+        nonactiveStateReason:
+          description: A code indicating the reason the key is not in the activation
+            state.
+          readOnly: true
+          type: integer
+      type: object
+    ListKeys:
+      description: The base schema for listing keys.
+      example:
+        metadata:
+          collectionType: application/vnd.ibm.kms.key+json
+          collectionTotal: 0
+        resources:
+          resources:
+          - createdBy: '...'
+            creationDate: YYYY-MM-DDTHH:MM:SSZ
+            crn: '...'
+            description: '...'
+            extractable: false
+            id: '...'
+            name: Root-key
+            state: 1
+            type: application/vnd.ibm.kms.key+json
+          - createdBy: '...'
+            creationDate: YYYY-MM-DDTHH:MM:SSZ
+            crn: '...'
+            description: '...'
+            extractable: true
+            id: '...'
+            name: Standard-key
+            state: 1
+            type: application/vnd.ibm.kms.key+json
+      properties:
+        metadata:
+          $ref: '#/components/schemas/CollectionMetadata'
+        resources:
+          description: An array of resources.
+          example:
+            resources:
+            - createdBy: '...'
+              creationDate: YYYY-MM-DDTHH:MM:SSZ
+              crn: '...'
+              description: '...'
+              extractable: false
+              id: '...'
+              name: Root-key
+              state: 1
+              type: application/vnd.ibm.kms.key+json
+            - createdBy: '...'
+              creationDate: YYYY-MM-DDTHH:MM:SSZ
+              crn: '...'
+              description: '...'
+              extractable: true
+              id: '...'
+              name: Standard-key
+              state: 1
+              type: application/vnd.ibm.kms.key+json
+          items:
+            allOf:
+            - $ref: '#/definitions/Key'
+            - $ref: '#/definitions/KeyMetadata'
+            type: object
+          type: array
+      required:
+      - metadata
+      - resources
       type: object
     Policy:
       description: Properties that are associated with policies.
       properties:
-        type:
-          default: application/vnd.ibm.kms.key+json
-          description: Specifies the MIME type that represents the policy resource.
-            Currently, only the default is supported.
-          example: application/vnd.ibm.kms.key+json
-          type: string
-        crn:
-          description: The Cloud Resource Name (CRN) that uniquely identifies your
-            cloud network resources.
-          example: crn:v1:bluemix:public:kms:<region>:a/<accountId>:<instanceId>:key:<keyId>:policies
+        createdBy:
+          description: The unique identifier for the resource that created the policy.
           readOnly: true
           type: string
         creationDate:
@@ -3174,8 +2698,10 @@ components:
           format: date-time
           readOnly: true
           type: string
-        createdBy:
-          description: The unique identifier for the resource that created the policy.
+        crn:
+          description: The Cloud Resource Name (CRN) that uniquely identifies your
+            cloud network resources.
+          example: crn:v1:bluemix:public:kms:<region>:a/<accountId>:<instanceId>:key:<keyId>:policies
           readOnly: true
           type: string
         lastUpdateDate:
@@ -3184,39 +2710,155 @@ components:
           format: date-time
           readOnly: true
           type: string
+        rotation:
+          $ref: '#/components/schemas/Policy_rotation'
+        type:
+          default: application/vnd.ibm.kms.key+json
+          description: Specifies the MIME type that represents the policy resource.
+            Currently, only the default is supported.
+          example: application/vnd.ibm.kms.key+json
+          type: string
         updatedBy:
           description: The unique identifier for the resource that updated the policy.
           readOnly: true
           type: string
-        rotation:
-          $ref: '#/components/schemas/Policy_rotation'
       required:
       - rotation
       - type
       type: object
-    Error:
+    RotateKey:
+      description: Properties that are associated with wrap actions.
       properties:
-        errorMsg:
-          description: The conditions for an error response.
+        payload:
+          description: "The key material that you want to import into the service\
+            \ for rotating an existing root key. This value is  required for a `rotate`\
+            \ action if you initially imported the key material when you created the\
+            \ key.\n   \nTo rotate an imported root key, provide a base64 encoded\
+            \ payload in the request entity-body. To rotate a root key that was initially\
+            \ generated by Key Protect, omit the `payload` property and pass in an\
+            \ empty request entity-body."
+          type: string
+      type: object
+    SecureImport:
+      description: Additional properties that are associated with importing a key
+        with an import token.
+      properties:
+        encryptedNonce:
+          description: "The encrypted nonce value that protects a key import request\
+            \ against replay attacks. This value must be encrypted by using the encrypted\
+            \ `payload` value that represents the key that you want to import into\
+            \ the service.\n  \nTo retrieve a nonce value, use `GET /import_token`.\
+            \ Then, encrypt the value by using an AES-GCM encryption  method that\
+            \ is compatible with your environment. "
+          format: binary
+          type: string
+        encryptionAlgorithm:
+          description: The RSA encryption algorithm that is used to encrypt the key
+            material that you want to import into the  service. Currently, `RSAES_OAEP_SHA_256`
+            is supported.
+          example: RSAES_OAEP_SHA_256
+          type: string
+        iv:
+          description: "The initialization vector (IV) that is generated by the AES-GCM\
+            \ algorithm when you encrypt a nonce. The IV  value is required to decrypt\
+            \ the encrypted nonce value that you provide when you make a key import\
+            \ request  to the service.\n  \nTo generate an IV, encrypt the `nonce`\
+            \ value by using an AES-GCM encryption method that is compatible with\
+            \ your environment. Then, supply the generated IV value when you import\
+            \ a key to the service."
+          format: binary
+          type: string
+        payload:
+          description: "The encrypted key material that you want to store and manage\
+            \ in the service. The value must be base64 encoded.\n  \nFirst, retrieve\
+            \ the public key that is associated with your service instance by calling\
+            \ `GET /import_token`.  Then, use the public key to run RSA encryption\
+            \ on the key material that you want to import to the service."
+          format: binary
           type: string
       required:
-      - errorMsg
+      - encryptedNonce
+      - encryptionAlgorithm
+      - iv
+      - payload
+      type: object
+    UnwrapKey:
+      description: Properties that are associated with unwrap actions.
+      properties:
+        aad:
+          description: "The additional authentication data (AAD) used to further secure\
+            \ the key. \n  \nIf you supply AAD when you make a `wrap` call, you must\
+            \ specify the same AAD during a subsequent `unwrap` call. "
+          items:
+            type: string
+          maxItems: 126
+          minItems: 0
+          type: array
+        ciphertext:
+          description: "The wrapped data encryption key (DEK) used in wrap actions\
+            \ when the query parameter is set to `unwrap`. The system requires a base64\
+            \ encoded ciphertext and returns a base64 encoded plaintext in the response\
+            \ entity-body when you perform an `unwrap` action on a key.\n     \n**Note:**\
+            \ When you unwrap a wrapped data encryption key (WDEK) by using a rotated\
+            \ root key, the service returns a new ciphertext in the response entity-body.\
+            \ Each ciphertext remains available for `unwrap` actions.  If you unwrap\
+            \ a DEK with a previous ciphertext, the service also returns the latest\
+            \ ciphertext in the response.  Use the latest ciphertext for future unwrap\
+            \ operations."
+          type: string
+        plaintext:
+          description: The original data encryption key (DEK) that was used in wrap
+            action. The value is base64 encoded.
+          maxLength: 4096
+          readOnly: true
+          type: string
+      required:
+      - ciphertext
+      type: object
+    WrapKey:
+      description: Properties that are associated with wrap actions.
+      properties:
+        aad:
+          description: "The additional authentication data (AAD) used to further secure\
+            \ the key. \n  \nIf you supply AAD when you make a `wrap` call, you must\
+            \ specify the same AAD during a subsequent `unwrap` call. "
+          items:
+            type: string
+          maxItems: 126
+          minItems: 0
+          type: array
+        ciphertext:
+          description: The wrapped data encryption key (DEK) that you can export to
+            your app or service. The value is base64 encoded.
+          readOnly: true
+          type: string
+        plaintext:
+          description: "The data encryption key (DEK) used in wrap actions when the\
+            \ query parameter is set to `wrap`. The system returns a base64 encoded\
+            \ plaintext in the response entity-body when you perform an `unwrap` action\
+            \ on a key.\n   \nTo wrap an existing DEK, provide a base64 encoded plaintext\
+            \ during a `wrap` action. To generate a new DEK, omit the `plaintext`\
+            \ property. Key Protect generates a random plaintext (32 bytes) that is\
+            \ rooted in an HSM and then wraps that value. "
+          maxLength: 4096
+          type: string
+      required:
+      - plaintext
       type: object
     GetImportToken_allOf:
       properties:
+        nonce:
+          description: The nonce value that is used to verify a key import request.
+            Encrypt and provide the encrypted nonce value when you use `POST /keys`
+            to securely import a key to the service.
+          format: binary
+          readOnly: true
+          type: string
         payload:
           description: "The public encryption key that you can use to encrypt key\
             \ material before you import it into the service. \n  \nThis value is\
             \ a PEM-encoded public key in PKIX format. Because PEM encoding is a binary\
             \ format, the value is base64 encoded."
-          format: binary
-          maxLength: 4096
-          readOnly: true
-          type: string
-        nonce:
-          description: The nonce value that is used to verify a key import request.
-            Encrypt and provide the encrypted nonce value when you use `POST /keys`
-            to securely import a key to the service.
           format: binary
           readOnly: true
           type: string
@@ -3248,7 +2890,248 @@ components:
           type: integer
   securitySchemes:
     BearerAuth:
-      bearerFormat: JWT
       description: Your IBM Cloud access token.
-      scheme: bearer
-      type: http
+      in: header
+      name: Authorization
+      type: apiKey
+x-components:
+  parameters:
+    CorrelationId:
+      description: The v4 UUID used to correlate and track transactions.
+      in: header
+      name: Correlation-Id
+      required: false
+      type: string
+    InstanceParam:
+      description: The IBM Cloud instance ID that identifies your Key Protect service
+        instance.
+      in: header
+      name: Bluemix-Instance
+      required: true
+      type: string
+    KeyId:
+      description: The v4 UUID that uniquely identifies the key.
+      in: path
+      name: id
+      required: true
+      type: string
+    LimitParam:
+      default: 200
+      description: "The number of keys to retrieve. By default, `GET /keys` returns\
+        \ the first 200 keys. To retrieve a different set of keys, use `limit` with\
+        \ `offset` to page through your available resources. The maximum value for\
+        \ `limit` is 5000.\n  \n**Usage:** If you have 20 keys in your instance, and\
+        \ you want to retrieve only the first 5 keys, use  `../keys?limit=5`."
+      in: query
+      maximum: 5000
+      minimum: 1
+      name: limit
+      required: false
+      type: integer
+    OffsetParam:
+      default: 0
+      description: "The number of keys to skip. By specifying `offset`, you retrieve\
+        \ a subset of keys that starts with the `offset` value. Use `offset` with\
+        \ `limit` to page through your available resources.\n  \n**Usage:** If you\
+        \ have 100 keys in your instance, and you want to retrieve keys 26 through\
+        \ 50, use  `../keys?offset=25&limit=25`.    "
+      in: query
+      minimum: 0
+      name: offset
+      required: false
+      type: integer
+    Prefer:
+      description: "Alters server behavior for POST or DELETE operations. A header\
+        \ with `return=minimal` causes the service to  return only the key identifier,\
+        \ or metadata. A header containing `return=representation` returns both the\
+        \ key  material and metadata in the response entity-body. If the key has been\
+        \ designated as a root key, the  system cannot return the key material.  \n\
+        \  \n**Note:** During POST operations, Key Protect may not immediately return\
+        \ the key material due to key generation time. To retrieve the key material,\
+        \ you can perform a subsequent `GET /keys/{id}` request."
+      enum:
+      - return=representation
+      - return=minimal
+      in: header
+      name: Prefer
+      required: false
+      type: string
+  responses:
+    Forbidden:
+      description: Your IBM Cloud access token is not authorized to access this resource.
+      examples:
+        application/json:
+          metadata:
+            collectionTotal: 1
+            collectionType: application/vnd.ibm.kms.error+json
+          resources:
+          - errorMsg: 'Forbidden: Your IBM Cloud access token is not authorized to
+              access this resource.'
+      schema:
+        $ref: '#/definitions/ErrorCollection'
+    Gone:
+      description: The requested key was previously deleted and is no longer available.
+        Please delete references to this key.
+      examples:
+        application/json:
+          metadata:
+            collectionTotal: 1
+            collectionType: application/vnd.ibm.kms.error+json
+          resources:
+          - 'errorMsg: ''Gone: The requested key was previously deleted and is no
+            longer available. Please delete  references to this key.'''
+      schema:
+        $ref: '#/definitions/ErrorCollection'
+    InternalServerError:
+      description: "IBM Key Protect is currently unavailable. Your request could not\
+        \ be processed. Please try again later. \n    \nIf the problem persists, note\
+        \ the `correlation-ID` in the response header and contact [IBM Cloud support](https://watson.service-now.com/wcp)."
+      examples:
+        application/json:
+          metadata:
+            collectionTotal: 1
+            collectionType: application/vnd.ibm.kms.error+json
+          resources:
+          - 'errorMsg: ''Internal Server Error: IBM Key Protect is currently unavailable.
+            Your request could not be  processed. Please try again later.'''
+      schema:
+        $ref: '#/definitions/ErrorCollection'
+    NotFound:
+      description: The key could not be found.
+      examples:
+        application/json:
+          metadata:
+            collectionTotal: 1
+            collectionType: application/vnd.ibm.kms.error+json
+          resources:
+          - errorMsg: 'Not Found: They key could not be found.'
+      schema:
+        $ref: '#/definitions/ErrorCollection'
+    TooManyRequests:
+      description: Too many requests. Please wait a few minutes and try again.
+      examples:
+        application/json:
+          metadata:
+            collectionTotal: 1
+            collectionType: application/vnd.ibm.kms.error+json
+          resources:
+          - errorMsg: 'Too Many Requests: Please wait a few minutes and try again.'
+      schema:
+        $ref: '#/definitions/ErrorCollection'
+    Unauthorized:
+      description: Your credentials are invalid or do not have the necessary permissions
+        to make this request. Verify that the  given IBM Cloud access token and instance
+        ID are correct. If the error persists, contact the account owner to check
+        your permissions.
+      examples:
+        application/json:
+          metadata:
+            collectionTotal: 1
+            collectionType: application/vnd.ibm.kms.error+json
+          resources:
+          - 'errorMsg: ''Unauthorized: Your credentials are invalid or do not have
+            the necessary permissions to make this request. Verify that the given
+            IBM Cloud access token and instance ID are correct. If the error  persists,
+            contact the account owner to check your permissions.'''
+      schema:
+        $ref: '#/definitions/ErrorCollection'
+  examples:
+    CreatePolicy:
+      value:
+        metadata:
+          collectionTotal: 1
+          collectionType: application/vnd.ibm.kms.policy+json
+        resources:
+        - rotation: 1
+          type: application/vnd.ibm.kms.policy+json
+    CreateRootKey:
+      value:
+        metadata:
+          collectionTotal: 1
+          collectionType: application/vnd.ibm.kms.key+json
+        resources:
+        - description: '...'
+          extractable: false
+          name: Root-key
+          type: application/vnd.ibm.kms.key+json
+    ImportRootKey:
+      value:
+        metadata:
+          collectionTotal: 1
+          collectionType: application/vnd.ibm.kms.key+json
+        resources:
+        - description: '...'
+          extractable: false
+          name: Imported-root-key
+          payload: '...'
+          type: application/vnd.ibm.kms.key+json
+    ImportRootKeyWithImportToken:
+      value:
+        metadata:
+          collectionTotal: 1
+          collectionType: application/vnd.ibm.kms.key+json
+        resources:
+        - description: '...'
+          encryptedNonce: '...'
+          encryptionAlgorithm: ' '
+          extractable: false
+          iv: '...'
+          name: Encrypted-root-key
+          payload: '...'
+          type: application/vnd.ibm.kms.key+json
+    RewrapKey:
+      value:
+        aad:
+        - <additional_data>
+        - <additional_data>
+        ciphertext: <encrypted_data_key>
+    RotateKey:
+      value:
+        payload: <new_data_key>
+    UnwrapKey:
+      value:
+        aad:
+        - <additional_data>
+        - <additional_data>
+        ciphertext: <encrypted_data_key>
+    UpdatePolicy:
+      value:
+        metadata:
+          collectionTotal: 1
+          collectionType: application/vnd.ibm.kms.policy+json
+        resources:
+        - rotation: 2
+          type: application/vnd.ibm.kms.policy+json
+    WrapKey:
+      value:
+        aad:
+        - <additional_data>
+        - <additional_data>
+        plaintext: <data_key>
+  requestBodies:
+    CreateImportTokenBody:
+      content:
+        application/vnd.ibm.kms.import_token+json:
+          schema:
+            $ref: '#/definitions/ImportToken'
+      description: The base request for creating an import token.
+      required: true
+    CreateKeyBody:
+      description: The base request for creating a new key.
+      in: body
+      name: body
+      required: true
+      schema: {}
+    CreatePolicyBody:
+      content:
+        application/vnd.ibm.kms.key+json:
+          schema:
+            $ref: '#/definitions/CreatePolicy'
+      description: The base request for creating a new policy associated with a key.
+      required: true
+    KeyActionBody:
+      description: The base request for key actions.
+      in: body
+      name: body
+      required: true
+      schema: {}
